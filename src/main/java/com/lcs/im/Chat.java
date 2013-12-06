@@ -25,12 +25,13 @@ public class Chat extends BaseServlet {
 			throws IOException {
 		JSONObject message = new JSONObject();
 		String name = req.getParameter("name");
-		String text = req.getParameter("text");
 		if (name == null || "".equals(name)) {
 			name = "god";
 		}
+		
 		message.put("name", name);
-		message.put("text", text);
+		message.put("tocken", req.getParameter("tocken"));		
+		message.put("text", req.getParameter("text"));
 		message.put("time", new Date().getTime());
 
 		MessageEvent.trigger(null, message);
