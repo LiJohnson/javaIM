@@ -4,7 +4,7 @@
 <web-app>
 	<display-name>Archetype Created Web Application</display-name>
     <session-config>
-        <session-timeout>1</session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
 	<filter>
 		<filter-name>Set Character Encoding</filter-name>
@@ -22,7 +22,6 @@
 	<listener>  
     	<listener-class>com.lcs.event.SessionListener</listener-class>  
 	</listener>
-	
 	
 	<servlet>
 		<servlet-name>send</servlet-name>
@@ -48,6 +47,14 @@
 			<param-value>listSession</param-value>
 		</init-param>
 	</servlet>
+	<servlet>
+        <servlet-name>tocken</servlet-name>
+        <servlet-class>com.lcs.im.Chat</servlet-class>
+        <init-param>
+            <param-name>method</param-name>
+            <param-value>getTocken</param-value>
+        </init-param>
+    </servlet>
 
 	<servlet-mapping>
 		<servlet-name>send</servlet-name>
@@ -61,4 +68,8 @@
 		<servlet-name>session</servlet-name>
 		<url-pattern>/listSession</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>tocken</servlet-name>
+        <url-pattern>/getTocken</url-pattern>
+    </servlet-mapping>
 </web-app>

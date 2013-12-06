@@ -40,10 +40,11 @@ public class Chat extends BaseServlet {
 
 	public void listen(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		String id = req.getSession().getId();
+		String id = req.getParameter("tocken");
+		boolean once = "once".equals(req.getParameter("once"));
 		JSONArray messageList = MessageEvent.getMessageList(id);
 		int i = 10;
-		while (messageList.size() == 0 && i > 0) {
+		while ( !once && messageList.size() == 0 && i > 0) {
 			i--;
 			MessageEvent.listen(id);
 		}
@@ -55,11 +56,19 @@ public class Chat extends BaseServlet {
 	public void listSession(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		JSONObject session = new JSONObject();
-		session.putAll(MessageEvent.getSessionMap());
-
+		session.putAll(MessageEvent.getSessionMap( "clean".equals(req.getParameter("clean")) ));
+		
 		outPut(req, resp, session.toString());
 	}
 
+	public void getTocken(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		JSONObject tocken = new JSONObject();
+		tocken.put("tocken", req.getSession().getId());
+		outPut(req, resp, tocken.toString());
+	}
+
+	
 	private void outPut(HttpServletRequest req, HttpServletResponse resp,
 			String data) throws IOException {
 		resp.setContentType("text/html;charset=UTF-8");

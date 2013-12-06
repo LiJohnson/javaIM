@@ -55,7 +55,10 @@ public class MessageEvent {
 		return lock;
 	}
 	
-	public static Map<String , JSONArray> getSessionMap() {
+	public static Map<String , JSONArray> getSessionMap( boolean clean ) {
+		if( clean ){
+			//ON_LINE_SESSION.clear();
+		}
 		return ON_LINE_SESSION;
 	}
 	
