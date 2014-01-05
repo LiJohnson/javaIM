@@ -57,7 +57,7 @@ public class MessageEvent {
 	
 	public static Map<String , JSONArray> getSessionMap( boolean clean ) {
 		if( clean ){
-			//ON_LINE_SESSION.clear();
+			ON_LINE_SESSION.clear();
 		}
 		return ON_LINE_SESSION;
 	}

@@ -72,4 +72,33 @@
         <servlet-name>tocken</servlet-name>
         <url-pattern>/getTocken</url-pattern>
     </servlet-mapping>
+    
+    
+    <!-- ******************************************* -->
+    <servlet>
+        <servlet-name>sendV2</servlet-name>
+        <servlet-class>com.lcs.im.ChatV2</servlet-class>
+        <init-param>
+            <param-name>method</param-name>
+            <param-value>send</param-value>
+        </init-param>
+    </servlet>
+    <servlet>
+        <servlet-name>listenV2</servlet-name>
+        <servlet-class>com.lcs.im.ChatV2</servlet-class>
+        <init-param>
+            <param-name>method</param-name>
+            <param-value>listen</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>sendV2</servlet-name>
+        <url-pattern>/sendV2</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>listenV2</servlet-name>
+        <url-pattern>/listenV2</url-pattern>
+    </servlet-mapping>
+
 </web-app>

@@ -1,8 +1,6 @@
 package com.lcs.im;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URLDecoder;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +15,7 @@ import com.lcs.event.MessageEvent;
  * @author LCS
  * 
  */
-public class Chat extends BaseServlet {
+public class Chat extends BaseServlet{
 
 	private static final long serialVersionUID = -2697955197777469188L;
 
@@ -58,7 +56,7 @@ public class Chat extends BaseServlet {
 			throws IOException {
 		JSONObject session = new JSONObject();
 		session.putAll(MessageEvent.getSessionMap( "clean".equals(req.getParameter("clean")) ));
-		
+		session.put("id", req.getSession().getId());
 		outPut(req, resp, session.toString());
 	}
 
