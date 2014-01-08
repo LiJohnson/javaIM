@@ -1,4 +1,6 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
+
 String frontPath = request.getContextPath();
 %>
 <!DOCTYPE html>
@@ -54,6 +56,12 @@ String frontPath = request.getContextPath();
 <div class="container">
 	<div class="row" >
 		<div class="col-md-6 col-md-offset-3" >
+		<div class="row" >
+			<div class="alert alert-warning alert-dismissable">
+			  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			  <p style="text-align: center"><strong>TIP! </strong> 如果不觉得无聊的可以开两个浏览器玩一下</p>
+			</div>
+		</div>
 		<div class="row chat-list" >
 		   <div class="col-md-12">
 				<div class="list-group" list>
