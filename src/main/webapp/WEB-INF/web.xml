@@ -91,6 +91,14 @@
             <param-value>listen</param-value>
         </init-param>
     </servlet>
+    <servlet>
+        <servlet-name>frame</servlet-name>
+        <servlet-class>com.lcs.im.ChatV2</servlet-class>
+        <init-param>
+            <param-name>method</param-name>
+            <param-value>frame</param-value>
+        </init-param>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>sendV2</servlet-name>
@@ -100,5 +108,8 @@
         <servlet-name>listenV2</servlet-name>
         <url-pattern>/listenV2</url-pattern>
     </servlet-mapping>
-
+    <servlet-mapping>
+        <servlet-name>frame</servlet-name>
+        <url-pattern>/frame</url-pattern>
+    </servlet-mapping>
 </web-app>

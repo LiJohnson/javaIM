@@ -35,7 +35,8 @@ public class ChatV2 extends BaseServlet {
 		
 		message.put("name", name);
 		message.put("id", id);
-		message.put("text", req.getParameter("text"));
+		message.put("text", req.getParameter("text").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+		message.put("pic", req.getParameter("pic"));
 		message.put("time", new Date().getTime());
 
 		MessageEvent.trigger(null, message);
@@ -61,6 +62,16 @@ public class ChatV2 extends BaseServlet {
 		
 		outPut(req, resp, data.toString());
 		messageList.clear();
+	}
+	
+	/**
+	 * frame
+	 * @param req
+	 * @param resp
+	 * @throws IOException
+	 */
+	public void frame(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		req.getParameter("name");
 	}
 	
 	/**
