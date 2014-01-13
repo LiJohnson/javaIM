@@ -57,6 +57,7 @@ public class ChatV2 extends BaseServlet {
 		JSONObject data = new JSONObject();
 		JSONArray messageList = MessageEvent.getMessageList(tocken);
 		
+		data.put("online", MessageEvent.getSessionMap(false).size());
 		data.put("id", tocken);
 		data.put("list", messageList);
 		
@@ -71,7 +72,7 @@ public class ChatV2 extends BaseServlet {
 	 * @throws IOException
 	 */
 	public void frame(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		req.getParameter("name");
+		resp.getWriter().write(req.getParameter("callback")+"()");
 	}
 	
 	/**
