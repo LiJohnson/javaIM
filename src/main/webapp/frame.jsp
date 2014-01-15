@@ -232,11 +232,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
             callbacks: {
                 remote_filter:function (query, cb) {
                 	s.send("#who","#who",function(data){
-                		var names = [];
-                		$.each(data,function(i,user){
-                			user.name && names.push(user);
-                		});
-                		cb(names);
+                		cb(data||[]);
                 	});
                 }/*,
                 matcher: function(flag, subtext) {
