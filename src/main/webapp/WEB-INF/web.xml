@@ -21,58 +21,7 @@
 	
 	<listener>  
     	<listener-class>com.lcs.event.SessionListener</listener-class>  
-	</listener>
-	
-	<servlet>
-		<servlet-name>send</servlet-name>
-		<servlet-class>com.lcs.im.Chat</servlet-class>
-		<init-param>
-			<param-name>method</param-name>
-			<param-value>send</param-value>
-		</init-param>
-	</servlet>
-	<servlet>
-		<servlet-name>listen</servlet-name>
-		<servlet-class>com.lcs.im.Chat</servlet-class>
-		<init-param>
-			<param-name>method</param-name>
-			<param-value>listen</param-value>
-		</init-param>
-	</servlet>
-	<servlet>
-		<servlet-name>session</servlet-name>
-		<servlet-class>com.lcs.im.Chat</servlet-class>
-		<init-param>
-			<param-name>method</param-name>
-			<param-value>listSession</param-value>
-		</init-param>
-	</servlet>
-	<servlet>
-        <servlet-name>tocken</servlet-name>
-        <servlet-class>com.lcs.im.Chat</servlet-class>
-        <init-param>
-            <param-name>method</param-name>
-            <param-value>getTocken</param-value>
-        </init-param>
-    </servlet>
-
-	<servlet-mapping>
-		<servlet-name>send</servlet-name>
-		<url-pattern>/send</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>listen</servlet-name>
-		<url-pattern>/listen</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>session</servlet-name>
-		<url-pattern>/listSession</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-        <servlet-name>tocken</servlet-name>
-        <url-pattern>/getTocken</url-pattern>
-    </servlet-mapping>
-    
+	</listener>    
     
     <!-- ******************************************* -->
     <servlet>

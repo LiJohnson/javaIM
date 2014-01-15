@@ -55,8 +55,8 @@ window.SClient = (function(){
 			}
 			
 			return post(this.urls.listen , postData , function(data){
-				callback && callback.call($this,data);
 				$this.listen(postData,callback);
+				callback && callback.call($this,data);
 			}).fail(function(){
 				setTimeout(function(){
 					$this.listen(postData,callback);

@@ -14,42 +14,47 @@ String frontPath = request.getContextPath();
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/style.css">
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-	<script src="client.js"></script>
+    
+    <script>
+    $(function(){
+    	var stor = window.localStorage || {};
+    	$(".chat").drag({handle:".chat .chat-head"});
+    	$("form input:not([type=submit])").change(function(){
+    		stor[this.name] = this.value;
+        }).each(function(){
+        	$(this).val(stor[this.name]);
+        });
+    	$("form [type=submit]").click();
+    });
+    </script>
 
-	<script>
-	$(function(){
-		var $form = $("form");
-		var $list = $("[list]");
-		var baseUrl = "<%=frontPath %>";
-		var s = new SClient(baseUrl+"/sendV2" , baseUrl+"/listenV2");
-		
-		$form.submit(function(){
-			if(!$form.check())return false;
-			var postData = $form.getData();
-			s.send(postData.name , postData.text,function(){
-				$form.find("textarea").val("");
-			});
-			return false;
-		});
-		$form.find("textarea").keydown(function(e){
-			e.ctrlKey && e.keyCode == 13 && $form.submit();
-		});
-		s.listen(function(data){
-			$.each(data.list||[],function(i,message){
-				$list.append( $("<div class='list-group-item' ><span class='badge label-info' html-name ></span><div html-text ></div></div>").setHtml(message).addClass( data.id == message.id ? "self":"" ) );
-				$(".chat-list").animate({scrollTop:$list.height()});
-			});
-		});
-		
-		$form.find("input[name=name]").change(function(){
-			window.localStorage.name = this.value;
-		}).val(window.localStorage.name);
-	});
-	</script>
 	<style>
-	   .chat-list{height: 500px;overflow-y:scroll; }
-	   .self{text-align: right;}
-	   .self .badge{background-color: #5bc0de;float: left;}
+	.chat{
+	   width: 320px;
+       height: 500px;
+       position: fixed;
+       bottom:  -480;
+       right: 2px;
+       top: inherit;
+       left: inherit;
+       z-index: 5555;
+	}
+	.chat .chat-head{
+		width: 100%;
+	    height: 25px;
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    z-index: 5555;
+	    background: rgba(128, 128, 128, 0.06);
+	    cursor: move;
+	}
+	.chat iframe{
+		width: 100%;
+		height: 100%;
+		border-radius: 3px;
+	    border: 1px solid rgb(182, 182, 182);
+	}
 	</style>
 </head>
 <body>
@@ -62,30 +67,28 @@ String frontPath = request.getContextPath();
 			  <p style="text-align: center"><strong>TIP! </strong> 如果不觉得无聊的可以开两个浏览器玩一下</p>
 			</div>
 		</div>
-		<div class="row chat-list" >
-		   <div class="col-md-12">
-				<div class="list-group" list>
-	            </div>
-			</div>
-		</div>
-		<hr>
+		
 		<div class="row" >
-		<form>
-			<div class="col-md-3">
-			    <label>
-	                <input type="text" name="name" placeholder="your big name" class="form-control" />
-	            </label>
+		<form action="frame.jsp" target="chat-frame">
+			<div class="col-md-12">
+	                <input type="text" name="name" placeholder="your big name" required="required" class="form-control" />
 			 </div>
-			 <div class="col-md-12" >
-			  <textarea check-len="1" name="text" class="form-control" resize="false" ></textarea>
-			</div>
+			 
+			 <div class="col-md-12">
+                    <input type="url" name="head" placeholder="image url" class="form-control" />
+                </label>
+             </div>
 			<div class="col-md-12" >
-			  <input type="submit" value="send" class="btn btn-default col-md-offset-6" style="float:right;" >
+			  <input type="submit" value="chat" class="btn btn-default" >
 			</div>
 		</form>
 		</div>
 		</div>
 	</div>
+</div>
+<div class="chat">
+    <div class="chat-head"></div>
+    <iframe name="chat-frame" id="chat-frame" ></iframe>
 </div>
 </body>
 </html>

@@ -29,19 +29,50 @@ public class ChatV2 extends BaseServlet {
 		JSONObject message = new JSONObject();
 		String name = req.getParameter("name");
 		String id = req.getSession().getId();
+		String text = req.getParameter("text").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+		String toId = this.getToId(text);
+		
+		if( "#who".equals(text) ){
+			outPut(req, resp, MessageEvent.listClient().toString());
+			return ;
+		}
+		
 		if (name == null || "".equals(name)) {
 			name = id;
 		}
 		
 		message.put("name", name);
 		message.put("id", id);
-		message.put("text", req.getParameter("text").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+		message.put("text", text);
 		message.put("pic", req.getParameter("pic"));
 		message.put("time", new Date().getTime());
-
-		MessageEvent.trigger(null, message);
+		if( toId != null ){
+			message.put("toId", toId);
+			MessageEvent.trigger(id, message);
+			if( toId.length() > 0 ){
+				MessageEvent.trigger(toId, message);
+			}
+		}else{
+			MessageEvent.trigger(null, message);
+		}
+		
 
 		outPut(req, resp, message.toString());
+	}
+	
+	private String getToId(String text){
+		int index =text.indexOf(" ");
+		if( !text.startsWith("@") || index < 1 )return null;
+		
+		String name = text.substring(1, text.indexOf(" "));
+		
+		JSONArray clients =  MessageEvent.listClient();
+		for( int i = 0 , len = clients.size()  ; i < len ; i++ ){
+			if( name.equals(clients.getJSONObject(i).getString("name")) ){
+				return clients.getJSONObject(i).getString("id");
+			}
+		}
+		return "";
 	}
 
 	/**
@@ -52,12 +83,12 @@ public class ChatV2 extends BaseServlet {
 	 */
 	public void listen(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String tocken = req.getSession().getId();		
-		
-		MessageEvent.listen(tocken);
+		String name = req.getParameter("name");
+		MessageEvent.listen(tocken,name);
 		JSONObject data = new JSONObject();
 		JSONArray messageList = MessageEvent.getMessageList(tocken);
 		
-		data.put("online", MessageEvent.getSessionMap(false).size());
+		data.put("online", MessageEvent.listClient().size());
 		data.put("id", tocken);
 		data.put("list", messageList);
 		
