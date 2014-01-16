@@ -27,6 +27,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 
 	<script>
 	var baseUrl = "<%=frontPath %>";
+	
 	//缓存
 	var ChatCache = (function(){
 		var s = window.sessionStorage || {};
@@ -46,15 +47,37 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		}
 		};
 	})();
+	
+	//chat 设置
+	var ChatSetting = function(){
+		var l = window.localStorage || {};
+        var setting = eval("("+l.ChatSetting+")")||{};
+        
+        this.get = function(k){return setting[k];};
+        this.set = function(k,v){ setting[k] = v;l.ChatSetting = JSON.stringify(setting); };
+        
+        this.tip = function(value){
+        	if( !arguments.length ){
+        		return this.get("tip") != "off";
+        	}
+        	this.set("tip",value);
+        };
+        this.opacity = function(value){
+        	if( !arguments.length ){
+                return this.get("opacity");
+            }
+        	this.set("opacity",value*1 || 100)
+        };
+	};
+	
 	//桌面通知
-	var notify = window.nn = (function(){
+	var notify = (function(){
 		var notifications = window.notifications || window.webkitNotifications;
 		var sound = ["tutor_urgency_02.ogg","tutor_urgency_05.ogg","tutor_urgency_04.ogg"];
 		var i = 0;
 		var replaceId = 0;
 		return function(message,title,pic){
-			if("request")return notifications.requestPermission(function(){});
-			if( !CMD.getTip() )return;
+			if(message == "request")return notifications.requestPermission(function(){});
 			if( notifications.checkPermission() != 0 )return ;
 
 			var notice = notifications.createNotification(pic||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",title||"通知",message);
@@ -67,69 +90,111 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		};
 	})();
 	
-	//命令
-	var CMD = {
-		help:function(){
-			var html = ["<p>"];
-			html.push("<a>表情</a>:直接输入中括号+相应的表情名;发送“<a>#emojis</a>”可以进行表情查阅");
-			html.push("<a>音乐</a>:发送<a href='http://www.xiami.com/' target=_blank >虾米</a>上歌曲的地址<a href='http://ww3.sinaimg.cn/large/5e22416bgw1ecj3fnf57dj20rs0emacn.png' target=_blank >示图</a>");
-			html.push("<a>视频</a>:发送<a href='http://youku.com/' target=_blank >优酷</a>上视频的地址<a href='http://ww2.sinaimg.cn/large/5e22416bgw1ecj3ebwh3rj20u10eztaf.png' target=_blank >示图</a>");
-			html.push("<a>图片</a>:使用截图工具进行截图，然后在输入窗口粘贴；或直接将图片文件拖到输入窗口");
-			html.push("<a>清屏</a>:发送“<a>#clear</a>”");
-			html.push("<a>私聊</a>:发送信息前@一下相应的用户名(“@abs 你是女的吗？”)");
-			html.push("<a>输入历史</a>:使用向上[↑](下[↓])箭头键可心调出输入历史");
-			html.push("<a>当前用户</a>:发送“<a>#who</a>”查看在线用户（有时延是必须的）");
-			html.push("<a>提示开关</a>:发送“<a>#on</a>”开启提示，发送“<a>#off</a>”关闭提示");
+	//帮助
+	var Helper = function( client , printTip ){
+		var cmds = {};
+		var _this = this;
+		this.setting = new ChatSetting();
+		this.cache = ChatCache;
+		this.help = function(){};
+		this.addCmd = function( cmd , excu, title , description ){
+			if( !cmd || !excu)return;
+			$.log(cmd);
+			if( cmds[cmd] )throw("cmd: "+cmd+" existed!");
+			
+			cmds[cmd] = {title:title,desc:description,excu:excu};
+		};
+		
+		this.excu = function(text){
+			text = text || "";
+            if(!text.match(/^#/))return false;
+            var param = text.replace(/^#/,'').split(" ");
+            var cmd = cmds[param.shift()];
+            if( !cmd )return false;
+            
+            var res = cmd.excu.apply( this , param );
 
-			return html.join("</p><p>")+"</p>";
-		},
-		emojis:(function(){
-			$(document).on("click",".help a.emoji",function(){
-				$(".chat-foot textarea").val( $(".chat-foot textarea").val() + $(this).attr("title") );
-			});
-			return function(){
-				var html = ["<div class=help>"];
-				$.each( $.WP.getEmojis() , function(i,e){
-					html.push("<a href=javascript:; class=emoji title='["+e.text+"]'><img src='"+$.WP.resUrl+"/emoji/"+e.name+"'></a>");
-				});
-				html.push("</div>");
-				return html.join("\n");
-			};
-		})(),
-		clear:function(){
-			$("[list]").empty();
-			ChatCache.clear();
-			return "<div>cleared</div>";
-		},
-		on:function(){
-			localStorage.tip = "on";
-			return "<div>已启动桌面通知</div>";
-		},
-		off:function(){
-			localStorage.tip = "off";
-			return "<div>已关闭桌面通知</div>";
-		},
-		who:(function(){
-			$(document).on("click","[data-at]",function(){
-                $(".chat-foot textarea").val("@"+$(this).data("at")+" ");
+            res != false && printTip(res||cmd.desc);
+            return true;
+		};
+		
+		this.getCmdData = function(){
+			var data = [];
+			for( var name in cmds ){
+                var cmd = cmds[name];
+                cmd.name = name;
+                data.push(cmd);
+            }
+			return data;
+		};
+		
+		this.addCmd( "help" ,  function(){
+			var html = [];
+			for( var name in cmds ){
+				var cmd = cmds[name];
+				cmd.title && html.push("<a>"+cmd.title+"</a> : " + cmd.desc);
+			}
+			return "<p>" + html.join("</p><p>") + "</p>";
+		}, "帮助" , "show this text" );
+		
+		this.addCmd( "emojis" , function(){
+		    var html = ["<div class=help>"];
+		    $.each( $.WP.getEmojis() , function(i,e){
+		    	  html.push("<a href=javascript:; class=emoji title='["+e.text+"]'><img src='"+$.WP.resUrl+"/emoji/"+e.name+"'></a>");
+		    });
+		    html.push("</div>");
+		    return html.join("\n");
+	    },"表情" , "直接输入中括号+相应的表情名;发送“<a>#emojis</a>”可以进行表情查阅" );
+		
+		this.addCmd("music",function(){},"音乐","发送<a href='http://www.xiami.com/' target=_blank >虾米</a>上歌曲的地址<a href='http://ww3.sinaimg.cn/large/5e22416bgw1ecj3fnf57dj20rs0emacn.png' target=_blank >示图</a>");
+		
+		this.addCmd("video",function(){},"视频","发送<a href='http://youku.com/' target=_blank >优酷</a>上视频的地址<a href='http://ww2.sinaimg.cn/large/5e22416bgw1ecj3ebwh3rj20u10eztaf.png' target=_blank >示图</a>");
+		
+		this.addCmd("pic",function(){},"图片" , "使用截图工具进行截图，然后在输入窗口粘贴；或直接将图片文件拖到输入窗口");
+		
+		this.addCmd("clear",function(){
+			printTip("clear");
+			this.cache.clear();
+			return false;
+		},"清屏","发送“<a>#clear</a>”");
+		
+		this.addCmd("priv",function(){},"私聊","发送信息前@一下相应的用户名(“@abs 你是女的吗？”,则只有用户abs才收到 信息)");
+		
+		this.addCmd("opacity",function( num ){
+			this.setting.opacity(num);
+			$("body").css("opacity",this.setting.opacity()/100);
+		},"透明","设置窗口透明度,发送“<a>#opacity num</a>”;num可为0到100");
+		
+		this.addCmd("history",function(){},"输入历史","使用向上[↑](下[↓])箭头键可心调出输入历史");
+		
+		this.addCmd("who",function(args){
+            client.send("#who","#who",function(data){
+                data = data || [];
+                var html = [];
+                for( var i = 0 , user ; user = data[i] ; i++ ){
+                    html.push("<a href=javascript:; data-at='"+user.name+"'>"+user.name+"</a>");
+                }
+                printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
             });
-			return function(s,printTip){
-	            s.send("#who","#who",function(data){
-	                data = data || [];
-	                var html = [];
-	                for( var i = 0 , user ; user = data[i] ; i++ ){
-	                    html.push("<a href=javascript:; data-at='"+user.name+"'>"+user.name+"</a>");
-	                }
-	                printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
-	            });
-	            return false;
-	        };
-		})(),
-		getTip:function(){
-			return localStorage.tip != "off";
-		}
+            return false;
+		},"当前用户","发送“<a>#who</a>”查看在线用户（有时延是必须的）");
+		
+		this.addCmd("on",function(){
+			this.setting.tip("on");
+			return "已启动桌面通知";
+		},"","");
+		
+		this.addCmd("off",function(){
+			this.setting.tip("off");
+			return "已关闭桌面通知";
+		},"","");
+		
+		this.addCmd("tip",function(){},"提示开关","发送“<a>#on</a>”开启提示，发送“<a>#off</a>”关闭提示");
+		
+        $("body").css("opacity",(this.setting.opacity()||100)/100);
 	};
 	
+	//输入历史
 	var InputHistory = function(){
         var inputs = eval("("+ChatCache.set("input")+")")||[];;
         var index = -1;
@@ -164,6 +229,17 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		var s = new SClient(baseUrl+"/sendV2" , baseUrl+"/listenV2");
 		var inputHistory = new InputHistory();
 		
+		var helper = new Helper( s ,function(html){
+			if( html == "clear" ){
+				$list.empty();
+			}else{
+			    $list.append("<div class='alert alert-success alert-dismissable' style='font-size: 12px;' > <button type='button' class='close animate' data-dismiss='alert' aria-hidden='true' style='right:-15px;'>&times;</button>" + html + "</div>");	
+			}
+            $(".chat-foot textarea").val("");
+            $(".chat-body").animate({scrollTop:$list.height()});
+            return $list;
+        });
+		
 		var print = function(list,id,cache){
 			ChatCache.set("id",id);
 			list = list||[];
@@ -184,32 +260,16 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 					$t.addClass("at");
 				}
 				$list.append($t);
-				!self  && !cache && notify(message.text,message.name+":",message.head);
+				!self  && !cache && helper.setting.tip()&& notify(message.text,message.name+":",message.head);
 			});
 			list.length && $(".chat-body").animate({scrollTop:$list.height()});
 		};
-		
-		var help = function(text){
-			text = text || "";
-			if(!text.match(/^#/))return false;
-			text = text.replace(/^#/,'');
-			if( !CMD[text] )return false;
-			var printTip = function(html){
-				$list.append("<div class='list-group-item alert alert-success alert-dismissable' > <button type='button' class='close animate' data-dismiss='alert' aria-hidden='true' style='right:-15px;'>&times;</button>" + html + "</div>");
-	            $(".chat-foot textarea").val("");
-	            $(".chat-body").animate({scrollTop:$list.height()});
-			};
-			var html = CMD[text].call(this,s,printTip);
-			html && printTip(html);
-			return true;
-		};
-
 		
 		$form.submit(function(){
 			if(!$form.check())return false;
 			var postData = $form.getData();
 			inputHistory.add(postData.text);
-			!help(postData.text) && s.send(postData,function(){
+			!helper.excu(postData.text) && s.send(postData,function(){
 				var text = $inputor.val()||"";
 				$inputor.val((text.match(/^@[^\s@[]+\s?/)||[""])[0]);
 				$image.empty();
@@ -245,7 +305,37 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
                 }*/
             },
             start_with_space:false
+        }).atwho({
+        	at:"#",
+        	tpl:"<li data-value='${atwho-at}${name}' title='${desc}' >${showName} <small>${showDesc}</small></li>",
+        	data:(function(){
+        		var data = [];
+        		$.each(helper.getCmdData(),function(i,c){
+        			var showName = c.name + " ";
+        			var desc = $("<a>" + c.desc + "</a>").text();
+        			var showDesc = desc;
+        			
+        			for( var i = showName.length ; i < 10 ;i++){
+        				showName +="-";
+        			}
+        			showName += " ";
+        			
+        			if( desc.length > 20  ){
+        				showDesc = desc.substr(0,20) + "...";
+        			}
+        			
+        			data.push({name:c.name,showName:showName,showDesc:showDesc,desc:desc});
+        		});
+        		$.log(data);
+        		return data;
+        	})(),
+        	limit:8
         });
+		
+		$(document).on("click",".help a.emoji",function(){
+			$inputor.val( $inputor.val() + $(this).attr("title") );
+        });
+		
 		$image.on("click",".close",function(){
 			$image.empty();
 		});
