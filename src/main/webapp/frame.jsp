@@ -51,15 +51,18 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		var notifications = window.notifications || window.webkitNotifications;
 		var sound = ["tutor_urgency_02.ogg","tutor_urgency_05.ogg","tutor_urgency_04.ogg"];
 		var i = 0;
+		var replaceId = 0;
 		return function(message,title,pic){
 			if( !CMD.getTip() )return;
 			if( notifications.checkPermission() != 0 )return notifications.requestPermission(function(){});
 
 			var notice = notifications.createNotification(pic||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",title||"通知",message);
+			notice.replaceId = "replaceId_" +  replaceId;
 			notice.show();
 			$.WP.play(sound[i]);
 			i = (i+1) % sound.length;
-			setTimeout(function(){notice.cancel();},3000);
+			replaceId = (replaceId+1)%3;
+			setTimeout(function(){notice.cancel();},10000);
 		};
 	})();
 	
