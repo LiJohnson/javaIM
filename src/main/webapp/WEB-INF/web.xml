@@ -4,7 +4,7 @@
 <web-app>
 	<display-name>Archetype Created Web Application</display-name>
     <session-config>
-        <session-timeout>30</session-timeout>
+        <session-timeout>3</session-timeout>
     </session-config>
 	<filter>
 		<filter-name>Set Character Encoding</filter-name>

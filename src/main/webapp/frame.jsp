@@ -53,8 +53,9 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		var i = 0;
 		var replaceId = 0;
 		return function(message,title,pic){
+			if("request")return notifications.requestPermission(function(){});
 			if( !CMD.getTip() )return;
-			if( notifications.checkPermission() != 0 )return notifications.requestPermission(function(){});
+			if( notifications.checkPermission() != 0 )return ;
 
 			var notice = notifications.createNotification(pic||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",title||"通知",message);
 			notice.replaceId = "replaceId_" +  replaceId;
@@ -62,7 +63,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			$.WP.play(sound[i]);
 			i = (i+1) % sound.length;
 			replaceId = (replaceId+1)%3;
-			setTimeout(function(){notice.cancel();},10000);
+			setTimeout(function(){notice.cancel();},5000);
 		};
 	})();
 	
@@ -119,7 +120,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	                for( var i = 0 , user ; user = data[i] ; i++ ){
 	                    html.push("<a href=javascript:; data-at='"+user.name+"'>"+user.name+"</a>");
 	                }
-	                printTip("<p>"+html.join("</p><p>")+"</p>");
+	                printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
 	            });
 	            return false;
 	        };
@@ -221,6 +222,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		}).keyup(function(e){
 			if( e.keyCode == KEY_CODE.upArrow )$inputor.val(inputHistory.get(1));
 			if( e.keyCode == KEY_CODE.downArrow )$inputor.val(inputHistory.get(-1));
+			notify("request");
 		}).getImage(function(data,file){
 			$image.empty();
 			$image.append($("<a href=javascript:; class='close animate'>&times;</a>"));
