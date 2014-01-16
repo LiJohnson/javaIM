@@ -277,7 +277,9 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			return false;
 		});
 		
-		$inputor.keydown(function(e){
+		$inputor.focus(function(){
+			notify("request");
+		}).keydown(function(e){
 			e.ctrlKey && e.keyCode == KEY_CODE.enter && $form.submit();
 		}).keyup(function(e){
 			if( e.keyCode == KEY_CODE.upArrow )$inputor.val(inputHistory.get(1));
@@ -303,8 +305,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
                 matcher: function(flag, subtext) {
                     return matched;
                 }*/
-            },
-            start_with_space:false
+            }
         }).atwho({
         	at:"#",
         	tpl:"<li data-value='${atwho-at}${name}' title='${desc}' >${showName} <small>${showDesc}</small></li>",
@@ -332,8 +333,11 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
         	limit:8
         });
 		
-		$(document).on("click",".help a.emoji",function(){
+		$list.on("click",".help a.emoji",function(){
 			$inputor.val( $inputor.val() + $(this).attr("title") );
+        });
+		$list.on("click","[data-at]",function(){
+            $inputor.val( "@" + $(this).data("at") + " " );
         });
 		
 		$image.on("click",".close",function(){
