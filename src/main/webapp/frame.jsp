@@ -51,23 +51,23 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	//chat 设置
 	var ChatSetting = function(){
 		var l = window.localStorage || {};
-        var setting = eval("("+l.ChatSetting+")")||{};
-        
-        this.get = function(k){return setting[k];};
-        this.set = function(k,v){ setting[k] = v;l.ChatSetting = JSON.stringify(setting); };
-        
-        this.tip = function(value){
-        	if( !arguments.length ){
-        		return this.get("tip") != "off";
-        	}
-        	this.set("tip",value);
-        };
-        this.opacity = function(value){
-        	if( !arguments.length ){
-                return this.get("opacity");
-            }
-        	this.set("opacity",value*1 || 100)
-        };
+		var setting = eval("("+l.ChatSetting+")")||{};
+		
+		this.get = function(k){return setting[k];};
+		this.set = function(k,v){ setting[k] = v;l.ChatSetting = JSON.stringify(setting); };
+		
+		this.tip = function(value){
+			if( !arguments.length ){
+				return this.get("tip") != "off";
+			}
+			this.set("tip",value);
+		};
+		this.opacity = function(value){
+			if( !arguments.length ){
+				return this.get("opacity");
+			}
+			this.set("opacity",value*1 || 100)
+		};
 	};
 	
 	//桌面通知
@@ -107,24 +107,24 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		
 		this.excu = function(text){
 			text = text || "";
-            if(!text.match(/^#/))return false;
-            var param = text.replace(/^#/,'').split(" ");
-            var cmd = cmds[param.shift()];
-            if( !cmd )return false;
-            
-            var res = cmd.excu.apply( this , param );
+			if(!text.match(/^#/))return false;
+			var param = text.replace(/^#/,'').split(" ");
+			var cmd = cmds[param.shift()];
+			if( !cmd )return false;
+			
+			var res = cmd.excu.apply( this , param );
 
-            res != false && printTip(res||cmd.desc);
-            return true;
+			res != false && printTip(res||cmd.desc);
+			return true;
 		};
 		
 		this.getCmdData = function(){
 			var data = [];
 			for( var name in cmds ){
-                var cmd = cmds[name];
-                cmd.name = name;
-                data.push(cmd);
-            }
+				var cmd = cmds[name];
+				cmd.name = name;
+				data.push(cmd);
+			}
 			return data;
 		};
 		
@@ -138,19 +138,21 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		}, "帮助" , "show this text" );
 		
 		this.addCmd( "emojis" , function(){
-		    var html = ["<div class=help>"];
-		    $.each( $.WP.getEmojis() , function(i,e){
-		    	  html.push("<a href=javascript:; class=emoji title='["+e.text+"]'><img src='"+$.WP.resUrl+"/emoji/"+e.name+"'></a>");
-		    });
-		    html.push("</div>");
-		    return html.join("\n");
-	    },"表情" , "直接输入中括号+相应的表情名;发送“<a>#emojis</a>”可以进行表情查阅" );
+			var html = ["<div class=help>"];
+			$.each( $.WP.getEmojis() , function(i,e){
+				html.push("<a href=javascript:; class=emoji title='["+e.text+"]'><img src='"+$.WP.resUrl+"/emoji/"+e.name+"'></a>");
+			});
+			html.push("</div>");
+			return html.join("\n");
+		},"表情" , "直接输入中括号+相应的表情名;发送“<a>#emojis</a>”可以进行表情查阅" );
 		
 		this.addCmd("music",function(){},"音乐","发送<a href='http://www.xiami.com/' target=_blank >虾米</a>上歌曲的地址<a href='http://ww3.sinaimg.cn/large/5e22416bgw1ecj3fnf57dj20rs0emacn.png' target=_blank >示图</a>");
 		
 		this.addCmd("video",function(){},"视频","发送<a href='http://youku.com/' target=_blank >优酷</a>上视频的地址<a href='http://ww2.sinaimg.cn/large/5e22416bgw1ecj3ebwh3rj20u10eztaf.png' target=_blank >示图</a>");
 		
 		this.addCmd("pic",function(){},"图片" , "使用截图工具进行截图，然后在输入窗口粘贴；或直接将图片文件拖到输入窗口");
+
+		this.addCmd("file",function(){},"文件" , "将文件直接拖到输入窗口即可");
 		
 		this.addCmd("clear",function(){
 			printTip("clear");
@@ -223,7 +225,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	$(function(){
 		var $form = $("form");
 		var $list = $("[list]");
-		var $image = $form.find(".image");
+		var $file = $form.find(".file");
 		var $inputor = $form.find("textarea");
 		
 		var s = new SClient(baseUrl+"/sendV2" , baseUrl+"/listenV2");
@@ -240,6 +242,17 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
             return $list;
         });
 		
+		var getFileHtml = function(base64Data,name){
+			var $html = $("<a></a>").prop({href:base64Data , target:'_blank'});
+
+			if( /^data:image.+/.test(base64Data) ){
+				$html.append($("<img>").prop("src",base64Data));
+			}else{
+				$html.append(name||"文件");
+			}
+			return $html;
+		};
+
 		var print = function(list,id,cache){
 			ChatCache.set("id",id);
 			list = list||[];
@@ -253,8 +266,8 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 				if( $.isArray(message.text) && window.JSON ) message.text = JSON.stringify(message.text);
 				var $t =  $("<div class='list-group-item' ><span class='badge label-info' html-name data-at='"+message.name+"' ></span><div html-text ></div></div>").setHtml(message).addClass( self ? "self":"" );
 				$t.find("[html-text]").richText();
-				if( message.pic ){
-					$t.append($("<a>").prop({href:message.pic,target:"_blank"}).append($("<img>").prop("src",message.pic)));
+				if( message.file ){
+					$t.append(getFileHtml(message.file));
 				}
 				if( message.toId ){
 					$t.addClass("at");
@@ -272,7 +285,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			!helper.excu(postData.text) && s.send(postData,function(){
 				var text = $inputor.val()||"";
 				$inputor.val((text.match(/^@[^\s@[]+\s?/)||[""])[0]);
-				$image.empty();
+				$file.empty();
 			});
 			return false;
 		});
@@ -285,63 +298,61 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			if( e.keyCode == KEY_CODE.upArrow )$inputor.val(inputHistory.get(1));
 			if( e.keyCode == KEY_CODE.downArrow )$inputor.val(inputHistory.get(-1));
 			notify("request");
-		}).getImage(function(data,file){
-			$image.empty();
-			$image.append($("<a href=javascript:; class='close animate'>&times;</a>"));
-			$image.append($("<img>").prop("src" , data));
-			$image.append($("<input type=hidden name='pic' >").val(data));
-			!$form.find("textarea").val() && $form.find("textarea").val("分享图片");
-		});
+		}).getFile(function(data,file){
+			$file.empty();
+			$file.append($("<a href=javascript:; class='close animate'>&times;</a>"));
+			$file.append(getFileHtml(data));
+			$file.append($("<input type=hidden name='file' >").val(data));
+			!$inputor.val() && $inputor.val("分享文件");
+			$inputor.val($inputor.val() + " $" + (file.name || "未命名文件") + " ");
+		},true);
 		
 		$inputor.atwho({
-            at:"@",
-            tpl:"<li data-value='${atwho-at}${name}' >${name}</li>",
-            callbacks: {
-                remote_filter:function (query, cb) {
-                	s.send("#who","#who",function(data){
-                		cb(data||[]);
-                	});
-                }/*,
-                matcher: function(flag, subtext) {
-                    return matched;
-                }*/
-            }
-        }).atwho({
-        	at:"#",
-        	tpl:"<li data-value='${atwho-at}${name}' title='${desc}' >${showName} <small>${showDesc}</small></li>",
-        	data:(function(){
-        		var data = [];
-        		$.each(helper.getCmdData(),function(i,c){
-        			var showName = c.name + " ";
-        			var desc = $("<a>" + c.desc + "</a>").text();
-        			var showDesc = desc;
-        			
-        			for( var i = showName.length ; i < 10 ;i++){
-        				showName +="-";
-        			}
-        			showName += " ";
-        			
-        			if( desc.length > 20  ){
-        				showDesc = desc.substr(0,20) + "...";
-        			}
-        			
-        			data.push({name:c.name,showName:showName,showDesc:showDesc,desc:desc});
-        		});
-        		$.log(data);
-        		return data;
-        	})(),
-        	limit:8
-        });
+			at:"@",
+			tpl:"<li data-value='${atwho-at}${name}' >${name}</li>",
+			callbacks: {
+				remote_filter:function (query, cb) {
+					s.send("#who","#who",function(data){
+						cb(data||[]);
+					});
+				}
+			}
+		}).atwho({
+		   	at:"#",
+			tpl:"<li data-value='${atwho-at}${name}' title='${desc}' >${showName} <small>${showDesc}</small></li>",
+			data:(function(){
+				var data = [];
+				$.each(helper.getCmdData(),function(i,c){
+					var showName = c.name + " ";
+					var desc = $("<a>" + c.desc + "</a>").text();
+					var showDesc = desc;
+					
+					for( var i = showName.length ; i < 10 ;i++){
+						showName +="-";
+					}
+					showName += " ";
+					
+					if( desc.length > 20  ){
+						showDesc = desc.substr(0,20) + "...";
+					}
+					
+					data.push({name:c.name,showName:showName,showDesc:showDesc,desc:desc});
+				});
+
+				return data;
+			})(),
+			limit:8
+		});
 		
 		$list.on("click",".help a.emoji",function(){
 			$inputor.val( $inputor.val() + $(this).attr("title") );
-        });
+		});
 		$list.on("click","[data-at]",function(){
-            $inputor.val( "@" + $(this).data("at") + " " );
-        });
+			$inputor.val( "@" + $(this).data("at") + " " );
+		});
 		
-		$image.on("click",".close",function(){
-			$image.empty();
+		$file.on("click",".close",function(){
+			$file.empty();
 		});
 		
 		s.listen({name:"<%=name %>"},function(data){
@@ -363,7 +374,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		.chat-foot textarea,.chat-foot input{height:50px;margin: 0;padding:0;display: inline-block;}
 		.chat-foot textarea{width: 93%;}
 		.chat-foot input{width: 5%;}
-		.chat-foot .image{position: absolute;left: 0;bottom: 50px;}
+		.chat-foot .file{position: absolute;left: 0;bottom: 50px;}
 		.self{text-align: right;}
 		.at{background-color:#f2dede;}
 		.self .badge{background-color: #5bc0de;float: left;}
@@ -391,7 +402,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	</div>
 	<div class="chat-foot">
 		<form>
-		   <div class="image"></div>
+		   <div class="file"></div>
 		   <textarea check-len="1" name="text" class="form-control" resize="false" placeholder="发送 “#help”查看帮助(有新功能更新 14.1.15)" ></textarea>
 		   <input type="hidden" value="<%=name %>#<%=head %>" name="name" />
 		   <input type="submit" value=" " class="btn btn-default btn-warning" />

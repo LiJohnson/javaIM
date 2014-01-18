@@ -44,7 +44,7 @@ public class ChatV2 extends BaseServlet {
 		message.put("name", name);
 		message.put("id", id);
 		message.put("text", text);
-		message.put("pic", req.getParameter("pic"));
+		message.put("file", req.getParameter("file"));
 		message.put("time", new Date().getTime());
 		if( toId != null ){
 			message.put("toId", toId);
