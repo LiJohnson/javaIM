@@ -19,9 +19,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	<link rel="stylesheet" href="//cxq.zhihuidao.com.cn/style/style.css">
 	<link rel="stylesheet" href="//cxq.zhihuidao.com.cn/html/style/jquery.atwho.css">
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-	<script src="//cxq.zhihuidao.com.cn/js/wp.js"></script>
 	<script src="//cxq.zhihuidao.com.cn/js/jquery.atwho.js"></script>
-	<script src1="http://192.168.1.59:8080/js/wp.js"></script>
 	
 	<script src="client.js"></script>
 
@@ -62,6 +60,19 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			}
 			this.set("tip",value);
 		};
+		this.desktop = function(value){
+			if( !arguments.length ){
+				return this.get("desktop") != "off";
+			}
+			this.set("desktop",value);
+		};
+		this.sound = function(value){
+			if( !arguments.length ){
+				return this.get("sound") != "off";
+			}
+			this.set("sound",value);
+		};
+
 		this.opacity = function(value){
 			if( !arguments.length ){
 				return this.get("opacity");
@@ -70,26 +81,41 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		};
 	};
 	
-	//桌面通知
-	var notify = (function(){
-		var notifications = window.notifications || window.webkitNotifications;
-		var sound = ["tutor_urgency_02.ogg","tutor_urgency_05.ogg","tutor_urgency_04.ogg"];
-		var i = 0;
-		var replaceId = 0;
-		return function(message,title,pic){
-			if(message == "request")return notifications.requestPermission(function(){});
-			if( notifications.checkPermission() != 0 )return ;
+	//通知
+	var Notify = function(setting){
+		this.setting = setting;
 
-			var notice = notifications.createNotification(pic||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",title||"通知",message);
-			notice.replaceId = "replaceId_" +  replaceId;
-			notice.show();
-			$.WP.play(sound[i]);
-			i = (i+1) % sound.length;
+		var notifications = window.notifications || window.webkitNotifications;
+		var replaceId = 0;
+		this.desktop = function(message){
+			if( !notifications )return;
+			var name = message.name.split("#");
+			var n = notifications.createNotification(name[1]||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",name[0]||"通知",message.text);
 			replaceId = (replaceId+1)%3;
-			setTimeout(function(){notice.cancel();},5000);
+			n.replaceId = "replaceId"+replaceId;
+			n.show();
+			setTimeout(function(){c.cancel();},5000);
 		};
-	})();
-	
+
+		
+		this.sound = (function(){
+			var audio = document.createElement("audio");
+
+			var baseUrl = "http://file.zhihuidao.com.cn/res/sound/coc/";
+			var soundId = 0;
+			var types = ["tutor_urgency_02.ogg","tutor_urgency_05.ogg","tutor_urgency_04.ogg"];
+			if( audio.play)return function(){};
+
+			return function(){
+				document.body.appendChild(audio);
+				audio.src = baseUrl + types[soundId];
+				audio.play();
+				soundId = (soundId+1)%types.length;
+			};
+		})();
+
+	};
+
 	//帮助
 	var Helper = function( client , printTip ){
 		var cmds = {};
@@ -137,11 +163,20 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			return "<p>" + html.join("</p><p>") + "</p>";
 		}, "帮助" , "show this text" );
 		
-		this.addCmd( "emojis" , function(){
+		this.addCmd( "emojis" , function(category){
 			var html = ["<div class=help>"];
-			$.each( $.WP.getEmojis() , function(i,e){
-				html.push("<a href=javascript:; class=emoji title='["+e.text+"]'><img src='"+$.WP.resUrl+"/emoji/"+e.name+"'></a>");
+			var data = false;
+			$.each( $.getEmojis() , function(i,c){
+				html.push("<a href=javascript:; class='btn btn-default btn-xs category' title='"+c.category+"' data-category='"+c.category+"' >"+c.category+"</a>");
+				data = data || (c.category == category ? c.data : false);
 			});
+			html.push("<br>");
+			data = data || $.getEmojis()[0].data;
+
+			$.each(data,function(i,e){
+				html.push("<a href=javascript:; class=emoji title='"+e.phrase+"'><img src='"+e.url+"'></a>");
+			});
+
 			html.push("</div>");
 			return html.join("\n");
 		},"表情" , "直接输入中括号+相应的表情名;发送“<a>#emojis</a>”可以进行表情查阅" );
@@ -347,6 +382,11 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		$list.on("click",".help a.emoji",function(){
 			$inputor.val( $inputor.val() + $(this).attr("title") );
 		});
+
+		$list.on("click","a.category",function(){
+			helper.excu("#emojis " + $(this).data("category"));
+		});
+
 		$list.on("click","[data-at]",function(){
 			$inputor.val( "@" + $(this).data("at") + " " );
 		});
