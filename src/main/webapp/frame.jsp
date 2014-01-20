@@ -164,7 +164,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		
 		this.addCmd("opacity",function( num ){
 			this.setting.opacity(num);
-			$("body").css("opacity",this.setting.opacity()/100);
+			$("html").css("opacity",this.setting.opacity()/100);
 		},"透明","设置窗口透明度,发送“<a>#opacity num</a>”;num可为0到100");
 		
 		this.addCmd("history",function(){},"输入历史","使用向上[↑](下[↓])箭头键可心调出输入历史");
@@ -193,7 +193,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		
 		this.addCmd("tip",function(){},"提示开关","发送“<a>#on</a>”开启提示，发送“<a>#off</a>”关闭提示");
 		
-        $("body").css("opacity",(this.setting.opacity()||100)/100);
+        $("html").css("opacity",(this.setting.opacity()||100)/100);
 	};
 	
 	//输入历史
