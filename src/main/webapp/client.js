@@ -1,5 +1,8 @@
-window.SClient = (function(){
-	var S = function( send , listen ){
+window.MY = (function(){
+	var MY = {};
+
+	//Client
+	MY.Client = function( send , listen ){
 		/**
 		 * internal post 
 		 */
@@ -69,9 +72,249 @@ window.SClient = (function(){
 		listen && this.setListenUrl(listen);
 
 	};
-	return S;
-})();
+	
+	/**
+	 * localStorage
+	 * @param  storage could be window.sessionStorage/window.localStorage
+	 * @param  String key     
+	 */
+	var Storage = function( storage , key ){
+		var data = eval("("+storage[key]+")") || {};
+		$.log("S",storage,key);
 
+		/**
+		 * get a value
+		 */
+		this.get = function(key){
+			return data[key];
+		};
+
+		/**
+		 * set a value
+		 */
+		this.set = function( k , v){
+			data[k] = v;
+			storage[key] = JSON.stringify(data);
+		};
+
+		/**
+		 * delete a key
+		 */
+		this.delete = function(k){
+			delete data[k];
+			storage[key] = JSON.stringify(data);
+		};
+
+		/**
+		 * destory this storage
+		 */
+		this.destory = function(){
+			if( storage.removeItem ){
+				storage.removeItem(key);
+			}else{
+				storage[key] = null;
+			}
+		};
+	};
+
+	/**
+	 * Cache , use window.sessionStorage to save data
+	 * @param 
+	 */
+	MY.Cache = function( key ){
+		this.stor = new Storage(window.sessionStorage || {} , key || "cache" );
+
+		var list = this.stor.get("list") || [];
+
+		this.push = function(message){
+			list.push(message);
+			this.stor.set("list",list);
+		};
+
+		this.get = function(){
+			return list;
+		};
+
+		this.clear = function(){
+			list = [];
+			this.stor.set("list",list);	
+		};
+
+	};
+
+	/**
+	 * setting , use window.localStorage to save data
+	 * @param {[type]} key [description]
+	 */
+	MY.Setting = function( key  ){
+		this.stor = new Storage( window.localStorage || {} , key || "ChatSetting" );
+		
+		this.desktop = function(value){
+			if( !arguments.length ){
+				return this.stor.get("desktop") != "off";
+			}
+			this.stor.set("desktop",value);
+		};
+
+		this.sound = function(value){
+			if( !arguments.length ){
+				return this.stor.get("sound") != "off";
+			}
+			this.stor.set("sound",value);
+		};
+
+		this.opacity = function(value){
+			if( !arguments.length ){
+				return this.stor.get("opacity");
+			}
+			value = value*1 || 100;
+			this.stor.set("opacity", value < 30 ? 30 : value );
+		};
+	};
+
+	/**
+	 * helper
+	 * @param Function printTip , a callback function for print some tips on screem
+	 */
+	MY.Helper = function( printTip ){
+		this.cmds = {};
+		var _this = this;
+
+		this.printTip = printTip || function(){};
+
+		/**
+		 * add a command
+		 * @param String name        [description]
+		 * @param Funtion excu        [description]
+		 * @param String title       [description]
+		 * @param String description [description]
+		 */
+		this.addCmd = function( name , excu, title , description ){
+			if( typeof name == 'string' )return this.addCmd({name:name,title:title,desc:description,excu:excu});
+			var cmd = name;
+			if( !cmd.name )return;
+
+			if( this.cmds[cmd.name] )throw("cmd: "+cmd.name+" existed!");
+
+			if( cmd.init )cmd.init.call(this);
+
+			this.cmds[cmd.name] = cmd;
+
+		};
+		
+		/**
+		 * excute a command
+		 * @param  String text [description]
+		 * @return 
+		 */
+		this.excu = function(text){
+			text = text || "";
+			if(!text.match(/^#/))return false;
+			var param = text.replace(/^#/,'').split(" ");
+			var cmd = this.cmds[param.shift()];
+			if( !cmd )return false;
+
+			if( !cmd.excu )return printTip(cmd.desc);
+
+			var res = cmd.excu.apply( this , param );
+
+			res != false && printTip(res||cmd.desc);
+			return true;
+		};
+		
+		/**
+		 * get command data
+		 * @return {[type]} [description]
+		 */
+		this.getCmdData = function(){
+			var data = [];
+			for( var name in this.cmds ){
+				data.push(this.cmds[name]);
+			}
+			return data;
+		};
+	};
+
+	/**
+	 * InputHistory
+	 * @param String key 
+	 */
+	MY.InputHistory = function(key){
+		var stor = new Storage( window.sessionStorage || {} , key ||"InputHistory" );
+		var inputs = stor.get("input") || [];
+		var index = -1;
+
+		/**
+		 * add a text
+		 * @param String text 
+		 */
+		this.add = function( text ){
+			if( text == inputs[0] )return;
+			inputs.unshift(text);
+			index = -1;
+			if( inputs.length > 20 )inputs.pop();
+			stor.set("input",inputs);
+		};
+
+		/**
+		 * get a text
+		 * @param  Int i 	offset
+		 */
+		this.get = function(i){
+			index = index +( i*1 || 1);
+			index = index >= inputs.length ? inputs.length -1 : index ;
+			index = index < 0 ? 0 : index ;
+			return inputs[index];
+		};
+	};
+
+	/**
+   	 * Notify
+   	 */
+	MY.Notify = function(){
+		/**
+		 * desktop
+		 */
+		this.desktop = (function(){
+			var notifications = window.notifications || window.webkitNotifications;
+			var replaceId = 0;
+
+			return function(message,timeout){
+				if( !notifications )return;
+				if( message == "request" )return notifications.requestPermission();
+
+				var name = message.name.split("#");
+				var n = notifications.createNotification(message.head || name[1]||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",name[0]||"通知",message.text);
+				replaceId = (replaceId+1)%3;
+				n.replaceId = "replaceId"+replaceId;
+				n.show();
+				setTimeout(function(){n.cancel();},timeout||5000);
+			};
+		})();
+
+		/**
+		 * sound		 
+		 */
+		this.sound = (function(){
+			var audio = document.createElement("audio");
+
+			var baseUrl = "http://file.zhihuidao.com.cn/res/sound/coc/";
+			var soundId = 0;
+			var types = ["tutor_urgency_02.ogg","tutor_urgency_05.ogg","tutor_urgency_04.ogg"];
+			if( !audio.play)return function(){};
+
+			return function(){
+				document.body.appendChild(audio);
+				audio.src = baseUrl + types[soundId];
+				audio.play();
+				soundId = (soundId+1)%types.length;
+			};
+		})();
+
+	};
+
+    return MY;
+})();
 
 //jquery-plugin
 (function($){
@@ -105,13 +348,13 @@ window.SClient = (function(){
 					} 
 				}
 				return false;
-				})(clipboardData.items);
+			})(clipboardData.items);
 			
-            if( item ){
-            	readFile(item.getAsFile());
-            }else{
-            	return e;
-            }
+			if( item ){
+				readFile(item.getAsFile());
+			}else{
+				return e;
+			}
 		});
 		
 		//drag file
@@ -131,6 +374,7 @@ window.SClient = (function(){
 	};
 })(window.jQuery);
 
+//jquery plugin
 //emojis
 (function($){
 	var baseUrl = "http://img.t.sinajs.cn/t4/appstyle/expression/ext/normal";
@@ -170,8 +414,7 @@ window.SClient = (function(){
 			return "http://www.xiami.com/widget/0_"+id[0]+"/singlePlayer.swf";
 		}).replace(/http:\/\/www.xiami.com\/widget\/\d+_\d+\/singlePlayer.swf(\?\S*)?/gi,function(swf,index,text){
 			if( index > 0 && /['"=]/.test(text.charAt(index-1)) )return swf;
-			return "<a class='btn btn-small' data-swf='"+swf+"' data-swf-param='{width:257,height:33,wmode:\'transparent\'}' ><span class='glyphicon glyphicon-music'></span></a>";
-			//return "<span class=music ><span class='xiami animate' ><embed src='"+swf+"' type='application/x-shockwave-flash' width='257' height='33' wmode='transparent'></embed></span><span class=more></span></span>";
+			return "<a href=javascript:; class='label label-default' style= 'padding: 0 3px;' data-swf='"+swf+"' data-swf-param='{width:257,height:33,wmode:\"transparent\"}' ><span class='glyphicon glyphicon-music'></span></a>";
 		});
 	});
 
@@ -185,7 +428,7 @@ window.SClient = (function(){
 		}).replace(/http:\/\/player\.youku\.com\/player\.php\/sid\/\w+\/v\.swf(\?[^\s\[@]*)?/gi,function(swf,index,text){
 			if( index > 0 && /['"=]/.test(text.charAt(index-1)) )return swf;
 
-			return "<a class='btn btn-small' data-swf='"+swf+"' data-swf-param='{allowFullScreen:true,width:160,height:130}' ><span class='glyphicon glyphicon-facetime-video'></span></a>";
+			return "<a href=javascript:; class='label label-default' style= 'padding: 0 3px;' data-swf='"+swf+"' data-swf-param='{allowFullScreen:true,width:160,height:130}' ><span class='glyphicon glyphicon-facetime-video'></span></a>";
 			
 		});
 	});
@@ -218,6 +461,16 @@ window.SClient = (function(){
 				text = f.fun(text);
 			});
 			$this.html(text);
+			$this.find("[data-swf]").click(function(){
+				var $swf = $(this);
+				if( $swf.data("embed") )return $swf.data("embed").toggle();
+
+				var $embed = $("<embed type='application/x-shockwave-flash'   wmode='transparent'></embed>");
+				
+				$embed.prop($.extend({src:$swf.data("swf")} , eval("("+$swf.data("swfParam")+")")||{}));
+				$this.after($embed);
+				$swf.data("embed",$embed);
+			});
 		});
 		return this;
 	};
