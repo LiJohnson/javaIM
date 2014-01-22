@@ -9,6 +9,7 @@ String frontPath = request.getContextPath();
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" href="f.ico">
+	<title>IM</title>
 	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js"></script>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">	
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
@@ -25,6 +26,16 @@ String frontPath = request.getContextPath();
         	$(this).val(stor[this.name]);
         });
     	$("form [type=submit]").click();
+    	var title = $("title").text();
+    	window.addEventListener("message",function(e){
+			var message = eval("("+e.data+")");
+			if( !message )return;
+			$("title").text( message.name + " : " + message.text );
+
+			setTimeout(function(){
+				$("title").text(title);
+			},2000);
+    	});
     });
     </script>
 

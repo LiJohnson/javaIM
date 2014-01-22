@@ -163,6 +163,13 @@ window.MY = (function(){
 			this.stor.set("sound",value);
 		};
 
+		this.frame = function(value){
+			if( !arguments.length ){
+				return this.stor.get("frame") != "off";
+			}
+			this.stor.set("frame",value);
+		};
+
 		this.opacity = function(value){
 			if( !arguments.length ){
 				return this.stor.get("opacity");

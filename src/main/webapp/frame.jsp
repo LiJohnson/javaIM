@@ -93,11 +93,16 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 				$list.append($t);
 
 				if( !self  && !cache ){
-					setting.desktop()  && notify.desktop(message);
-					setting.sound()  && notify.sound(message);
+					hasNewMessage(message);
 				}
 			});
 			list.length && $(".chat-body").animate({scrollTop:$list.height()});
+		};
+
+		var hasNewMessage = function (message){
+			setting.desktop()  && notify.desktop(message);
+			setting.sound()  && notify.sound(message);
+			 setting.frame() && window.parent.postMessage( JSON.stringify(message),"*");
 		};
 
 		/**********************************************************************************/
@@ -178,6 +183,12 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			title:"私聊",
 			desc:"发送信息前@一下相应的用户名(“@abs 你是女的吗？”,则只有用户abs才收到 信息)"
 		});
+
+		helper.addCmd({
+			name:"inputHistory",
+			title:"输入历史",
+			desc:"先按下ctrl键，再使用向上[↑](下[↓])箭头键可以调出输入历史"
+		});
 		
 		
 		helper.addCmd({
@@ -217,6 +228,17 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		});
 
 		helper.addCmd({
+			name:"frame",
+			title:"frame提醒",
+			desc:"设置frame信息提醒（新信息时的窗口闪烁）,发送<a>#frame on</a>启动提醒，<a>#frame off</a>关闭提醒",
+			excu:function(param){
+				if(!param)return;
+				setting.frame(param);
+				return "frame提醒已" + ( setting.frame() ? "启动" : "关闭" );
+			}
+		});
+
+		helper.addCmd({
 			name:"who",
 			title:"在线用户",
 			desc:"发送“<a>#who</a>”查看在线用户（有时延是必须的）",
@@ -250,8 +272,11 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		}).keydown(function(e){
 			e.ctrlKey && e.keyCode == KEY_CODE.enter && $form.submit();
 		}).keyup(function(e){
-			if( e.keyCode == KEY_CODE.upArrow )$inputor.val(inputHistory.get(1));
-			if( e.keyCode == KEY_CODE.downArrow )$inputor.val(inputHistory.get(-1));
+			if( !e.ctrlKey )return;
+
+			if( e.keyCode == KEY_CODE.upArrow ){ $inputor.val(inputHistory.get(1)); }
+			if( e.keyCode == KEY_CODE.downArrow ){ $inputor.val(inputHistory.get(-1)); }
+
 		}).getFile(function(data,file){
 			$file.empty();
 			$file.append($("<a href=javascript:; class='close animate'>&times;</a>"));
@@ -278,6 +303,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			data:(function(){
 				var data = [];
 				$.each(helper.getCmdData(),function(i,c){
+					if(!c.excu)return;
 					var showName = c.name + " ";
 					var desc = $("<a>" + c.desc + "</a>").text();
 					var showDesc = desc;
@@ -297,6 +323,19 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 				return data;
 			})(),
 			limit:8
+		}).atwho({
+			at:"[",
+			tpl:"<li data-value='${name}' title='${desc}' >${name}<img src='${url}'></li>",
+			data:(function(){
+				var data = [];
+				$.each( $.getEmojis() , function(i,c){
+					$.each(c.data,function(i,e){
+						data.push($.extend({name:e.phrase},e));
+					});
+				});
+				return data;
+			})(),
+			limit:10
 		});
 		
 		$list.on("click",".help a.emoji",function(){
@@ -350,15 +389,14 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 <div class="chat" >
 	<div class="chat-head">
 		<div class="row">
-		<div class="col-md-12" >
-		  <span class="label label-default" style="float:left;" ><%=name %></span>
-		  <span class="label label-danger col-md-offset-1" style="float:left;"  ><span data-online ></span>&nbsp;<span class="glyphicon glyphicon-comment" style="font-size: 9px;"></span></span>
-		  <span style="float:right;" ></span>
-		  </div>
+			<div class="col-md-12" >
+				<span class="label label-default" style="float:left;" ><%=name %></span>
+				<span class="label label-danger col-md-offset-1" style="float:left;"  ><span data-online >0</span></span>
+			</div>
 		</div>
 	</div>
 	<div class="chat-body">
-		<div class="row chat-list " >
+		<div class="row chat-list" >
 		   <div class="col-md-12">
 				<div class="list-group" list>
 				</div>
@@ -368,7 +406,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	<div class="chat-foot">
 		<form>
 		   <div class="file"></div>
-		   <textarea check-len="1" name="text" class="form-control" resize="false" placeholder="发送 “#help”查看帮助(有新功能更新 14.1.15)" ></textarea>
+		   <textarea check-len="1" name="text" class="form-control" resize="false" placeholder="发送 “#help”查看帮助(14.1.22更新)" ></textarea>
 		   <input type="hidden" value="<%=name %>#<%=head %>" name="name" />
 		   <input type="submit" value=" " class="btn btn-default btn-warning" />
 		</form>
