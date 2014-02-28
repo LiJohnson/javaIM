@@ -248,9 +248,9 @@
 		helper.addCmd({
             name:"about",
             title:"关于",
-            desc:"V2.0 <br>基于 long polling & ajax 开发<br>githug <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>",
+            desc:"V2.0 <br>基于 long polling & ajax 开发<br>github <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>",
             excu:function(){
-            	return "V2.0 <br>基于 long polling & ajax 开发<br>githug <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>";
+            	return "V2.0 <br>基于 long polling & ajax 开发<br>github <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>";
             }
         });
 
