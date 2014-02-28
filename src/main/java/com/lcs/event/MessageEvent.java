@@ -32,7 +32,7 @@ public class MessageEvent {
 	 * @param id
 	 * @param message
 	 */
-	public static void trigger( String id ,JSONObject message  ) {
+	public static void trigger( String id ,Object message  ) {
 		if( id != null ){
 			try{
 				JSONObject client = getClient(id);

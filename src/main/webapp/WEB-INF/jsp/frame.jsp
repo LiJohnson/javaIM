@@ -1,30 +1,23 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%
-//request.setCharacterEncoding("utf-8");
-String name = request.getParameter("name");
-String head = request.getParameter("head");
-String frontPath = request.getContextPath();
 
-name = name == null ? request.getSession().getId() : name ;//new String( name.getBytes("gbk") , "utf-8" );
-%>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" href="f.ico">
-	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js"></script>
+	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js,jquery.atwho.js"></script>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">	
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/style.css">
-	<link rel="stylesheet" href="//cxq.zhihuidao.com.cn/html/style/jquery.atwho.css">
+	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/jquery.atwho.css">
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 	<script src="//cxq.zhihuidao.com.cn/js/jquery.atwho.js"></script>
 	
-	<script src="client.js"></script>
+	<script src="/static/client.js"></script>
 
 	<script>
-	var baseUrl = "<%=frontPath %>";
+	var baseUrl = "${contextPath}";
 
     var KEY_CODE = {
     		leftArrow:37,
@@ -40,7 +33,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		var $file = $form.find(".file");
 		var $inputor = $form.find("textarea");
 		
-		var s = new MY.Client(baseUrl+"/sendV2" , baseUrl+"/listenV2");
+		var s = new MY.Client(baseUrl+"/send" , baseUrl+"/listen");
 		var inputHistory = new MY.InputHistory("inputHistory");
 		var chatCache = new MY.Cache("chatCache");
 		var setting = new MY.Setting("chatSetting");
@@ -74,9 +67,6 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			$.each(list||[],function(i,message){
 				!cache && chatCache.push(message);
 				var self = id == message.id;
-				message.name = message.name.split("#");
-				message.head = message.head || message.name[1];
-				message.name = message.name[0];
 				
 				if( $.isArray(message.text) && window.JSON ) message.text = JSON.stringify(message.text);
 
@@ -254,6 +244,15 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 				return false;
 			}
 		});
+		
+		helper.addCmd({
+            name:"about",
+            title:"关于",
+            desc:"V2.0 <br>基于 long polling & ajax 开发<br>githug <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>",
+            excu:function(){
+            	return "V2.0 <br>基于 long polling & ajax 开发<br>githug <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>";
+            }
+        });
 
 		$form.submit(function(){
 			if(!$form.check())return false;
@@ -288,18 +287,18 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 		
 		$inputor.atwho({
 			at:"@",
-			tpl:"<li data-value='${atwho-at}${name}' >${name}</li>",
+			tpl:"<li data-value='${'${atwho-at}${name}'}' >${'${name}'}</li>",
 			callbacks: {
 				remote_filter:function (query, cb) {
 					s.send("#who","#who",function(data){
-						cb(data||[]);
+						cb(data && data.data ||[]);
 					});
 				}
 			},
 			limit:8
 		}).atwho({
 		   	at:"#",
-			tpl:"<li data-value='${atwho-at}${name}' title='${desc}' >${showName} <small>${showDesc}</small></li>",
+			tpl:"<li data-value='${'${atwho-at}${name}'}' title='${'${desc}'}' >${'${showName}'} <small>${'${showDesc}'}</small></li>",
 			data:(function(){
 				var data = [];
 				$.each(helper.getCmdData(),function(i,c){
@@ -325,7 +324,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			limit:8
 		}).atwho({
 			at:"[",
-			tpl:"<li data-value='${name}' title='${desc}' >${name}<img src='${url}' style='zoom:0.8;float:right'></li>",
+			tpl:"<li data-value='${'${name}'}' title='${'${desc}'}' >${'${name}'}<img src='${'${url}'}' style='zoom:0.8;float:right'></li>",
 			data:(function(){
 				var data = [];
 				$.each( $.getEmojis() , function(i,c){
@@ -360,7 +359,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 			$file.empty();
 		});
 		
-		s.listen({name:"<%=name %>"},function(data){
+		s.listen({name:"${name}"},function(data){
 			print(data.list,data.id);
 			$("[data-online]").html(data.online);
 		});
@@ -392,7 +391,7 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	<div class="chat-head">
 		<div class="row">
 			<div class="col-md-12" >
-				<span class="label label-default" style="float:left;" ><%=name %></span>
+				<span class="label label-default" style="float:left;" >${name }</span>
 				<span class="label label-danger col-md-offset-1" style="float:left;"  ><span data-online >0</span></span>
 			</div>
 		</div>
@@ -408,8 +407,9 @@ name = name == null ? request.getSession().getId() : name ;//new String( name.ge
 	<div class="chat-foot">
 		<form>
 		   <div class="file"></div>
-		   <textarea check-len="1" name="text" class="form-control" resize="false" placeholder="发送 “#help”查看帮助(14.1.22更新)" ></textarea>
-		   <input type="hidden" value="<%=name %>#<%=head %>" name="name" />
+		   <textarea check-len="1" name="text" class="form-control" resize="false" placeholder="发送 “#help”查看帮助" ></textarea>
+		   <input type="hidden" value="${name }" name="name" />
+		   <input type="hidden" value="${head }" name="head" />
 		   <input type="submit" value=" " class="btn btn-default btn-warning" />
 		</form>
 		</div>

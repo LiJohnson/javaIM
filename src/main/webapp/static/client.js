@@ -46,12 +46,17 @@ window.MY = (function(){
 			return text && post( this.urls.send , postData , callback );
 		};
 		
+		this.lastPost = 0;
 		/**
 		 * listen message
 		 * @param  Object   postData 
 		 * @param  Function callback 
 		 */
 		this.listen = function(postData , callback){
+			if( new Date() - this.lastPost < 1000 )return setTimeout(function(){$this.listen(postData,callback);},1000);
+			
+			this.lastPost = new Date();
+			
 			if( typeof postData == "function" ){
 				callback = postData;
 				postData = {};
