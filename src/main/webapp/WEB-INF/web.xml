@@ -37,6 +37,7 @@
         <servlet-name>default</servlet-name>
         <url-pattern>*.css</url-pattern>
     </servlet-mapping>
+    
 
 	<servlet>
 		<servlet-name>sprint-mvc-dispatcher</servlet-name>
