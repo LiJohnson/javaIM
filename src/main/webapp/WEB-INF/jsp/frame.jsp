@@ -155,7 +155,10 @@
 		helper.addCmd({
 			name:"file",
 			title:"文件" , 
-			desc:"将文件直接拖到输入窗口即可"
+			desc:"将文件直接拖到输入窗口即可",
+			excu:function(){
+				return "<input type=file />";
+			}
 		});
 		
 		helper.addCmd({
@@ -254,6 +257,19 @@
             }
         });
 
+		var addFile = function( file){
+			var reader = new FileReader();
+			reader.onload =function(e){
+				$file.empty();
+				$file.append($("<a href=javascript:; class='close animate'>&times;</a>"));
+				$file.append(getFileHtml(e.target.result,file.name));
+				$file.append($("<input type=hidden name='file' >").val(e.target.result));
+				!$inputor.val() && $inputor.val("分享文件");
+				$inputor.val($inputor.val() + " $" + (file.name || "未命名文件") + " ");
+			};
+			reader.readAsDataURL(file);
+		};
+
 		$form.submit(function(){
 			if(!$form.check())return false;
 			var postData = $form.getData();
@@ -277,12 +293,7 @@
 			if( e.keyCode == KEY_CODE.downArrow ){ $inputor.val(inputHistory.get(-1)); }
 
 		}).getFile(function(data,file){
-			$file.empty();
-			$file.append($("<a href=javascript:; class='close animate'>&times;</a>"));
-			$file.append(getFileHtml(data,file.name));
-			$file.append($("<input type=hidden name='file' >").val(data));
-			!$inputor.val() && $inputor.val("分享文件");
-			$inputor.val($inputor.val() + " $" + (file.name || "未命名文件") + " ");
+			addFile(file);
 		},true);
 		
 		$inputor.atwho({
@@ -353,6 +364,10 @@
 
 		$list.on("click","[data-cmd]",function(){
 			$inputor.val( "#" + $(this).data("cmd") + " " );
+		});
+
+		$list.on("change","input[type=file]",function(){
+			addFile(this.files[0]);
 		});
 		
 		$file.on("click",".close",function(){
