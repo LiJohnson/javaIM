@@ -1,68 +1,104 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+
+String frontPath = request.getContextPath();
+%>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>java for lcs</title>
-    <link rel="shortcut icon" id="favicon" type="image/x-icon" href="f.ico">
-	<meta http-equiv="pragma" content="no-cache">
-	<meta http-equiv="cache-control" content="no-cache">
-	<meta http-equiv="expires" content="0">    
-	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
-	<meta http-equiv="description" content="This is my page">
-	<style>
-	div.stage {
-		padding-top: 10%;
-		text-align: center;
-		font-size: 100px;
-		cursor: pointer;
-		-webkit-perspective: 450px;
-	}
-	
-	
-	div span {
-		background-color: rgba(0, 255, 184, 0.0001961);
-		bordert-radius: 13px;
-	}
-	.flash{
-		display: block;
-		position:relative;
-		animation:flash 2s infinite;
-		-moz-animation:flash 2s infinite; 
-		-webkit-animation:flash 2s infinite;
-		-o-animation:flash 2s infinite; 
-	}
-	
-	@keyframes flash
-	{
-		0%  {transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-		50% {transform:  rotateY(-30deg);text-shadow: rgb(0, 0, 0) -0px 74px 41px;}
-		100% {transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-		
-	}
-	@-webkit-keyframes flash /* Safari and Chrome */
-	{
-		0%  {-webkit-transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-		50% {-webkit-transform:  rotateY(-30deg);text-shadow: rgb(0, 0, 0) -0px 74px 41px;}
-		100%{-webkit-transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-	}
-	@-moz-keyframes flash /* Firefox */
-	{
-		0%  {-moz-transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-		50% {-moz-transform:  rotateY(-30deg);text-shadow: rgb(0, 0, 0) -0px 74px 41px;}
-		100% {-moz-transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-	}
-	
-	@-o-keyframes flash /* Opera */
-	{
-		0%  {-o-transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-		50% {-o-transform:  rotateY(-30deg);text-shadow: rgb(0, 0, 0) -0px 74px 41px;}
-		100% {-o-transform:  rotateY(30deg);text-shadow: rgb(0, 0, 0) 40px 70px 41px;}
-	}
-	</style>
-  </head>
-  
-  <body style="overflow: hidden; ">
-	<div class="stage" >
-		<span class=flash contenteditable>Hi lcs~ Nothing happens.</span>
-	</div>
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%-- <link rel="shortcut icon" href="f.ico"> --%>
+    <title>IM</title>
+    <script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">  
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/style.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    
+    <script>
+    $(function(){
+        var stor = window.localStorage || {};
+        $(".chat").drag({handle:".chat .chat-head"});
+        $("form input:not([type=submit])").change(function(){
+            stor[this.name] = this.value;
+        }).each(function(){
+            $(this).val(stor[this.name]);
+        });
+        $("form [type=submit]").click();
+        var title = $("title").text();
+        window.addEventListener("message",function(e){
+            var message = eval("("+e.data+")");
+            if( !message )return;
+            $("title").text( message.name + " : " + message.text );
+
+            setTimeout(function(){
+                $("title").text(title);
+            },2000);
+        });
+    });
+    </script>
+
+    <style>
+    .chat{
+       width: 320px;
+       height: 500px;
+       position: fixed;
+       bottom:  -480;
+       left: 600px;
+       top: inherit;
+       z-index: 5555;
+    }
+    .chat .chat-head{
+        width: 100%;
+        height: 20px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 5555;
+        background: rgba(128, 128, 128, 0.06);
+        cursor: move;
+    }
+    .chat iframe{
+        width: 100%;
+        height: 100%;
+        border-radius: 3px;
+        border: 1px solid rgb(182, 182, 182);
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row" >
+        <div class="col-md-6 col-md-offset-3" >
+        <div class="row" >
+            <div class="alert alert-warning alert-dismissable">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <p style="text-align: center"><strong>TIP! </strong> 如果不觉得无聊的可以开两个浏览器玩一下</p>
+            </div>
+        </div>
+        
+        <div class="row" >
+        <form action="frame" target="chat-frame">
+            <div class="col-md-12">
+                    <input type="text" name="name" placeholder="your big name" required="required" class="form-control" />
+             </div>
+             
+             <div class="col-md-12">
+                    <input type="url" name="head" placeholder="image url" class="form-control" />
+                </label>
+             </div>
+            <div class="col-md-12" >
+              <input type="submit" value="chat" class="btn btn-default" >
+            </div>
+        </form>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="chat">
+    <div class="chat-head"></div>
+    <iframe name="chat-frame" id="chat-frame" ></iframe>
+</div>
 </body>
 </html>

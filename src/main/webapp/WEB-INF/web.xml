@@ -1,11 +1,17 @@
 <!DOCTYPE web-app
   PUBLIC '-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN'
   'http://java.sun.com/dtd/web-app_2_3.dtd'>
-<web-app>
-	<display-name>Archetype Created Web Application</display-name>
-    <session-config>
-        <session-timeout>3</session-timeout>
-    </session-config>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+    http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+	<display-name>IM</display-name>
+
+	<session-config>
+		<session-timeout>3</session-timeout>
+	</session-config>
+
 	<filter>
 		<filter-name>Set Character Encoding</filter-name>
 		<filter-class>com.util.SetCharacterEncodingFilter</filter-class>
@@ -18,47 +24,33 @@
 		<filter-name>Set Character Encoding</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
-	<listener>  
-    	<listener-class>com.lcs.event.SessionListener</listener-class>  
-	</listener>    
-    
-    <!-- ******************************************* -->
-    <servlet>
-        <servlet-name>sendV2</servlet-name>
-        <servlet-class>com.lcs.im.ChatV2</servlet-class>
-        <init-param>
-            <param-name>method</param-name>
-            <param-value>send</param-value>
-        </init-param>
-    </servlet>
-    <servlet>
-        <servlet-name>listenV2</servlet-name>
-        <servlet-class>com.lcs.im.ChatV2</servlet-class>
-        <init-param>
-            <param-name>method</param-name>
-            <param-value>listen</param-value>
-        </init-param>
-    </servlet>
-    <servlet>
-        <servlet-name>frame</servlet-name>
-        <servlet-class>com.lcs.im.ChatV2</servlet-class>
-        <init-param>
-            <param-name>method</param-name>
-            <param-value>frame</param-value>
-        </init-param>
-    </servlet>
 
-    <servlet-mapping>
-        <servlet-name>sendV2</servlet-name>
-        <url-pattern>/sendV2</url-pattern>
+	<listener>
+		<listener-class>com.lcs.event.SessionListener</listener-class>
+	</listener>
+
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.js</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.css</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>listenV2</servlet-name>
-        <url-pattern>/listenV2</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>frame</servlet-name>
-        <url-pattern>/frame</url-pattern>
-    </servlet-mapping>
+    
+
+	<servlet>
+		<servlet-name>sprint-mvc-dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/springMVC.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>sprint-mvc-dispatcher</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
 </web-app>
