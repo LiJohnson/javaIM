@@ -237,7 +237,7 @@
 			desc:"发送“<a>#who</a>”查看在线用户（有时延是必须的）",
 			excu:function(){
 				s.send("#who","#who",function(data){
-					data = data || [];
+					data = data && data.data || [];
 					var html = [];
 					for( var i = 0 , user ; user = data[i] ; i++ ){
 					html.push("<a href=javascript:; data-at='"+user.name+"'>"+user.name+"</a>");
