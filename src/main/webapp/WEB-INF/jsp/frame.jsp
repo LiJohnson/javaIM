@@ -56,7 +56,7 @@
 			if( /^data:image.+/.test(base64Data) ){
 				$html.append($("<img>").prop("src",base64Data));
 			}else{
-				$html.append(name||"文件");
+				$html.append(name||"文件").prop({download:name});
 			}
 			return $html;
 		};
@@ -74,7 +74,7 @@
 
 				$t.find("[html-text]").richText();
 				if( message.file ){
-					$t.append(getFileHtml(message.file , (message.text.match(/\$\S+/)||[""])[0].replace(/^\$/,'')));
+					$t.append(getFileHtml(message.file , (message.text.match(/\\$\S+/)||[""])[0].replace(/^\\$/,'')));
 				}
 				if( message.toId ){
 					$t.addClass("alert-warning");
