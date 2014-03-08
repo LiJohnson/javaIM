@@ -27,5 +27,5 @@
 			</list>
 		</property>
 	</bean>
-
+    <import resource="webSocket.xml"/>
 </beans>
