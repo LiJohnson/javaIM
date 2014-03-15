@@ -15,6 +15,7 @@
 	<script src="//cxq.zhihuidao.com.cn/js/jquery.atwho.js"></script>
 	
 	<script src="/static/client.js"></script>
+	<script src="/static/test.js"></script>
 
 	<script>
 	var baseUrl = "${contextPath}";

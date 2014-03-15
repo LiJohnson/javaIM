@@ -65,6 +65,13 @@ public class MessageController extends BaseController {
 		return "frame";
 	}
 	
+	@RequestMapping( value="socket")
+	public String socket( String name , String head , ModelMap map) {
+		map.put("name", name == null ? this.session.getId() : name);
+		map.put("head", head == null ? "" : head);
+		return "frame";
+	}
+	
 	private String getToId(String text){
 		int index =text.indexOf(" ");
 		if( !text.startsWith("@") || index < 1 )return null;
