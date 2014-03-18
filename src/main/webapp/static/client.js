@@ -1,39 +1,18 @@
 window.MY = (function(){
 	var MY = {};
 
-	//Client
-	MY.Client = function( send , listen ){
-		/**
-		 * internal post 
-		 */
-		var post = function(url , data , callback){
-			return $.post( url , data , callback , "json" );
-		};
+	MY.SocketClient = function( url ){
+		if( !window.WebSocket )throw("not suported!");
+		if( !url )throw("need a url!");
 		
-		var $this = this;
+		var _this = this;
 		
-		this.urls = {};
-		/**
-		 * set send message url
-		 * @param String url 
-		 */
-		this.setSendUrl = function(url){
-			this.urls.send = url;
-		};
-		/**
-		 * set listen message url
-		 * @param String url 
-		 */
-		this.setListenUrl = function(url){
-			this.urls.listen = url;
-		};
+		var isInit = false;
+		var socket = new WebSocket(url);
+		var onMessage = function(){};
 		
-		/**
-		 * send message
-		 * @param  String   name     
-		 * @param  String   text     
-		 * @param  Function callback 
-		 */
+		var q = [];
+		
 		this.send = function(name , text , callback){
 			var postData = {};
 			if( typeof name == "object" ){ 
@@ -43,39 +22,46 @@ window.MY = (function(){
 				postData.name = name;
 				postData.text = text;
 			}
-			return text && post( this.urls.send , postData , callback );
-		};
-		
-		this.lastPost = 0;
-		/**
-		 * listen message
-		 * @param  Object   postData 
-		 * @param  Function callback 
-		 */
-		this.listen = function(postData , callback){
-			if( new Date() - this.lastPost < 1000 )return setTimeout(function(){$this.listen(postData,callback);},1000);
+			postData = JSON.stringify(postData );
 			
-			this.lastPost = new Date();
-			
-			if( typeof postData == "function" ){
-				callback = postData;
-				postData = {};
+			if( !isInit ){
+				q.push(postData);
+			}
+			else{
+				socket.send(postData);	
 			}
 			
-			return post(this.urls.listen , postData , function(data){
-				$this.listen(postData,callback);
-				callback && callback.call($this,data);
-			}).fail(function(){
-				setTimeout(function(){
-					$this.listen(postData,callback);
-				},3000);
-				
-			});
+			callback && callback();
+			
 		};
 		
-		send && this.setSendUrl(send);
-		listen && this.setListenUrl(listen);
-
+		this.listen = function(callback){
+			onMessage = callback;
+		};
+		
+		var initSocket = function(){
+			socket = new WebSocket(url);
+			isInit = false;
+			
+			socket.onopen = function(){
+				for( i in q ){
+					socket.send(q[i]);
+				}
+				isInit = true;
+			};
+			
+			socket.onclose = function(){
+				$.log("closed");
+				setTimeout(function(){initSocket();},2000);
+			};
+			
+			socket.onmessage = function(event){
+				onMessage.call(_this,$.parseJSON(event.data));
+			};
+		};
+		
+		initSocket();
+		
 	};
 	
 	/**

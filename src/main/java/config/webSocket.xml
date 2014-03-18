@@ -10,9 +10,10 @@
     <websocket:handlers>
         <websocket:mapping path="/chat" handler="chat"/>
         <websocket:handshake-interceptors  >
-            <bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
+            <bean class="com.lcs.im.websocket.Interceptors"/>
         </websocket:handshake-interceptors>
     </websocket:handlers>
     
     <bean id="chat" class="com.lcs.im.websocket.Chat"/>
+    <bean id="sessionManager" class="com.lcs.im.websocket.SessionManager"/>
 </beans>

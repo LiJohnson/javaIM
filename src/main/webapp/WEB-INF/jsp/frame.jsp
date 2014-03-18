@@ -15,7 +15,6 @@
 	<script src="//cxq.zhihuidao.com.cn/js/jquery.atwho.js"></script>
 	
 	<script src="/static/client.js"></script>
-	<script src="/static/test.js"></script>
 
 	<script>
 	var baseUrl = "${contextPath}";
@@ -34,7 +33,7 @@
 		var $file = $form.find(".file");
 		var $inputor = $form.find("textarea");
 		
-		var s = new MY.Client(baseUrl+"/send" , baseUrl+"/listen");
+		var s = new MY.SocketClient("ws://lcs.com:9090/chat");
 		var inputHistory = new MY.InputHistory("inputHistory");
 		var chatCache = new MY.Cache("chatCache");
 		var setting = new MY.Setting("chatSetting");
@@ -64,8 +63,7 @@
 
 		var print = function(list,id,cache){
 			chatCache.stor.set("id",id);
-			list = list||[];
-			$.each(list||[],function(i,message){
+			$.each(list,function(i,message){
 				!cache && chatCache.push(message);
 				var self = id == message.id;
 				
@@ -93,7 +91,7 @@
 		var hasNewMessage = function (message){
 			setting.desktop()  && notify.desktop(message);
 			setting.sound()  && notify.sound(message);
-			 setting.frame() && window.parent.postMessage( JSON.stringify(message),"*");
+			setting.frame() && window.parent.postMessage( JSON.stringify(message),"*");
 		};
 
 		/**********************************************************************************/
@@ -375,9 +373,8 @@
 			$file.empty();
 		});
 		
-		s.listen({name:"${name}"},function(data){
-			print(data.list,data.id);
-			$("[data-online]").html(data.online);
+		s.listen(function(data){
+			print([data]);
 		});
 		
 		print(chatCache.get(),chatCache.stor.get("id"),true);
