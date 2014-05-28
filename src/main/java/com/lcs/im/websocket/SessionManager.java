@@ -9,32 +9,56 @@ import java.util.Map.Entry;
 
 import org.springframework.web.socket.WebSocketSession;
 
-public class SessionManager  {
-	private Map<String, WebSocketSession> sessions;
-	
+public class SessionManager {
+	private Map<String, SocketData> sessions;
+
 	public SessionManager() {
-		this.sessions = new HashMap<String, WebSocketSession>();
+		this.sessions = new HashMap<String, SocketData>();
 	}
-	
-	public void add( WebSocketSession session ){
-		this.sessions.put(session.getId(), session);
+
+	public void add(WebSocketSession session, String name) {
+		this.sessions.put(session.getId(), new SocketData(session, name));
 	}
-	
-	public void remove( WebSocketSession session ){
-		this.sessions.remove(session);
+
+	public void remove(WebSocketSession session) {
+		this.sessions.remove(session.getId());
 	}
-	
-	public List<WebSocketSession> getAll(){
-		List<WebSocketSession> list = new ArrayList<WebSocketSession>();
-		Iterator< Entry<String, WebSocketSession> > it = this.sessions.entrySet().iterator();
-		while( it.hasNext() ){
-			Entry<String, WebSocketSession> entry = it.next();
-			WebSocketSession session = entry.getValue();
-			if( session.isOpen() ){
+
+	public List<SocketData> getAll() {
+		List<SocketData> list = new ArrayList<SocketData>();
+		Iterator<Entry<String, SocketData>> it = this.sessions.entrySet()
+				.iterator();
+		while (it.hasNext()) {
+			Entry<String, SocketData> entry = it.next();
+			SocketData session = entry.getValue();
+			if (session.socketSession.isOpen()) {
 				list.add(session);
 			}
 		}
 		return list;
 	}
 	
+	public List<String> getAllName() {
+		List<String> list = new ArrayList<String>();
+		Iterator<Entry<String, SocketData>> it = this.sessions.entrySet()
+				.iterator();
+		while (it.hasNext()) {
+			Entry<String, SocketData> entry = it.next();
+			SocketData session = entry.getValue();
+			if (session.socketSession.isOpen()) {
+				list.add(session.name);
+			}
+		}
+		return list;
+	}
+}
+
+class SocketData {
+	public WebSocketSession socketSession;
+	public String name;
+
+	public SocketData(WebSocketSession socketSession, String name) {
+		this.socketSession = socketSession;
+		this.name = name;
+	}
 }

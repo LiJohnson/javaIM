@@ -8,8 +8,8 @@ window.MY = (function(){
 		var _this = this;
 		
 		var isInit = false;
-		var socket = new WebSocket(url);
-		var onMessage = function(){};
+		var socket ;//= new WebSocket(url);
+		var onMessage = [];
 		
 		var q = [];
 		
@@ -36,7 +36,9 @@ window.MY = (function(){
 		};
 		
 		this.listen = function(callback){
-			onMessage = callback;
+			if( typeof callback != "function" )return;
+			onMessage.push(callback);
+			onMessage.length == 1 && initSocket();
 		};
 		
 		var initSocket = function(){
@@ -56,12 +58,11 @@ window.MY = (function(){
 			};
 			
 			socket.onmessage = function(event){
-				onMessage.call(_this,$.parseJSON(event.data));
+				for( var i in onMessage ){
+					onMessage[i].call(_this,$.parseJSON(event.data));
+				}
 			};
 		};
-		
-		initSocket();
-		
 	};
 	
 	/**
@@ -71,7 +72,7 @@ window.MY = (function(){
 	 */
 	var Storage = function( storage , key ){
 		var data = eval("("+storage[key]+")") || {};
-		$.log("S",storage,key);
+		
 
 		/**
 		 * get a value
@@ -315,7 +316,7 @@ window.MY = (function(){
 })();
 
 //jquery-plugin
-(function($){
+(function($){return;
 
 	$.fn.getFile = function(cb , base64){
 		cb = $.isFunction(cb) ? cb : function(){};

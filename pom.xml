@@ -9,6 +9,7 @@
 
 	<properties>
 		<spring.version>4.0.2.RELEASE</spring.version>
+		<json.version>20140107</json.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -61,11 +62,10 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.sf.json-lib</groupId>
-			<artifactId>json-lib</artifactId>
-			<version>2.3</version>
-			<classifier>jdk15</classifier>
-		</dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
 		
 		<dependency>
             <groupId>org.codehaus.jackson</groupId>

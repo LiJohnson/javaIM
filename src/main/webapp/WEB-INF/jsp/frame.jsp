@@ -6,13 +6,15 @@
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" href="f.ico">
-	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js,jquery.atwho.js"></script>
+	
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">	
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/style.css">
 	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/jquery.atwho.css">
+	
+	
+	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js,jquery.atwho.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-	<script src="//cxq.zhihuidao.com.cn/js/jquery.atwho.js"></script>
 	
 	<script src="/static/client.js"></script>
 
@@ -62,7 +64,7 @@
 		};
 
 		var print = function(list,id,cache){
-			chatCache.stor.set("id",id);
+			id && chatCache.stor.set("id",id);
 			$.each(list,function(i,message){
 				!cache && chatCache.push(message);
 				var self = id == message.id;
@@ -235,14 +237,7 @@
 			title:"在线用户",
 			desc:"发送“<a>#who</a>”查看在线用户（有时延是必须的）",
 			excu:function(){
-				s.send("#who","#who",function(data){
-					data = data && data.data || [];
-					var html = [];
-					for( var i = 0 , user ; user = data[i] ; i++ ){
-					html.push("<a href=javascript:; data-at='"+user.name+"'>"+user.name+"</a>");
-					}
-					helper.printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
-				});
+				s.send({type:"who"});
 				return false;
 			}
 		});
@@ -300,8 +295,13 @@
 			tpl:"<li data-value='${'${atwho-at}${name}'}' >${'${name}'}</li>",
 			callbacks: {
 				remote_filter:function (query, cb) {
-					s.send("#who","#who",function(data){
-						cb(data && data.data ||[]);
+					s.send({type:"atwho"});
+					$inputor.data("atwhoCallback",function(data){
+						var list = [];
+						$.each(data||[],function(){
+							list.push({name:this});
+						})
+						cb(list);
 					});
 				}
 			},
@@ -374,7 +374,24 @@
 		});
 		
 		s.listen(function(data){
-			print([data]);
+			if(data.type == "connected"){
+				$form.find("input[name=id]").val(data.uid);
+				s.send( $.extend($form.getData(),{type:"connected"}) );
+			}else if( data.type == "count" ){
+				$("[data-online]").html(data.count);
+			}else if( data.type == "who" ){
+                data = data && data.data || [];
+                var html = [];
+                for( var i = 0 , user ; user = data[i] ; i++ ){
+                    html.push("<a href=javascript:; data-at='"+user+"'>"+user+"</a>");
+                }
+                helper.printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
+			}else if( data.type == "atwho" ){
+				$inputor.data("atwhoCallback").call(this,data.data||[]);
+			}else{
+				print([data],$form.find("input[name=id]").val());	
+			}
+			
 		});
 		
 		print(chatCache.get(),chatCache.stor.get("id"),true);
@@ -421,8 +438,10 @@
 		<form>
 		   <div class="file"></div>
 		   <textarea check-len="1" name="text" class="form-control" resize="false" placeholder="发送 “#help”查看帮助" ></textarea>
-		   <input type="hidden" value="${name }" name="name" />
-		   <input type="hidden" value="${head }" name="head" />
+		   <input type="hidden" name="name" value="${name }" />
+		   <input type="hidden" name="head" value="${head }" />
+		   <input type="hidden" name="id" />
+		   <input type="hidden" name="type" value="message" />
 		   <input type="submit" value=" " class="btn btn-default btn-warning" />
 		</form>
 		</div>
