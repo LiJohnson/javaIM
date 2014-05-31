@@ -5,7 +5,7 @@
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="shortcut icon" href="f.ico">
+	<link rel="shortcut icon" href="favicon.ico">
 	
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">	
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
@@ -19,7 +19,7 @@
 	<script src="/static/client.js"></script>
 
 	<script>
-	var baseUrl = "${contextPath}";
+	var baseUrl = "${baseUrl}";
 
     var KEY_CODE = {
     		leftArrow:37,
@@ -35,7 +35,7 @@
 		var $file = $form.find(".file");
 		var $inputor = $form.find("textarea");
 		
-		var s = new MY.SocketClient("ws://lcs.com:9090/chat");
+		var s = new MY.SocketClient( baseUrl.replace(/^https?/,"ws") + "/chat");
 		var inputHistory = new MY.InputHistory("inputHistory");
 		var chatCache = new MY.Cache("chatCache");
 		var setting = new MY.Setting("chatSetting");

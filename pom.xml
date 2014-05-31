@@ -33,8 +33,8 @@
 		</dependency>
 		
 		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-websocket</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
 		   <version>${spring.version}</version>
 		</dependency>
 		
@@ -62,22 +62,22 @@
 		</dependency>
 
 		<dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${json.version}</version>
-        </dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+		</dependency>
 		
 		<dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-        	<version>1.9.13</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-lgpl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.9.13</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-lgpl</artifactId>
+			<version>1.9.13</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -101,6 +101,29 @@
 				</configuration>
 
 			</plugin>
+			
+<plugin>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-maven-plugin</artifactId>
+  <configuration>
+    <scanIntervalSeconds>10</scanIntervalSeconds>
+    <webApp>
+      <contextPath>/</contextPath>
+    </webApp>
+  </configuration>
+</plugin>
+<!--
+
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<version>6.1.10</version>
+					<configuration>
+					
+					<scanIntervalSeconds>2</scanIntervalSeconds>
+					</configuration>
+			</plugin>
+-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>

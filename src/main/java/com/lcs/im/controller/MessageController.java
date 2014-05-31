@@ -14,6 +14,7 @@ public class MessageController extends BaseController {
 	public String frame( String name , String head , ModelMap map) {
 		map.put("name", name == null ? this.session.getId() : name);
 		map.put("head", head == null ? "" : head);
+		map.put("baseUrl", request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath());
 		return "frame";
 	}
 }

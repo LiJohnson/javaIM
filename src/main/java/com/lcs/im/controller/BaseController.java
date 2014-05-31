@@ -10,13 +10,4 @@ public class BaseController {
     protected HttpServletRequest request;
     @Autowired(required=false)
     protected HttpSession session;
-        
-    
-    public void setRequest(HttpServletRequest request){
-    	if( request == null )return;
-    	
-    	this.request = request;
-    	this.request.setAttribute("frontPath", this.request.getContextPath());
-    		
-    }
 }
