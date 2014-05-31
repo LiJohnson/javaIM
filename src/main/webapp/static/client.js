@@ -275,19 +275,22 @@ window.MY = (function(){
 		 * desktop
 		 */
 		this.desktop = (function(){
-			var notifications = window.notifications || window.webkitNotifications;
+			var Notification = window.Notification ||  window.webkitNotification;
 			var replaceId = 0;
 
 			return function(message,timeout){
-				if( !notifications )return;
-				if( message == "request" )return notifications.requestPermission();
+				if( !Notification )return;
+				if( message == "request" )return Notification.requestPermission();
+				
+				replaceId = (replaceId+1)%3;
 
 				var name = message.name.split("#");
-				var n = notifications.createNotification(message.head || name[1]||"http://ww2.sinaimg.cn/large/5e22416bgw1ecitfrifssj201200v3y9.png",name[0]||"通知",message.text);
-				replaceId = (replaceId+1)%3;
-				n.replaceId = "replaceId"+replaceId;
-				n.show();
-				setTimeout(function(){n.cancel();},timeout||5000);
+				var n = new Notification(name[0]||"通知",{
+					icon:message.head || name[1]||"http://ww2.sinaimg.cn/large/5e22416bgw1egxl28z8moj2019015a9t.jpg",
+					body:message.text,
+					tag:"replaceId"+replaceId
+				});
+				setTimeout(function(){n.close();},timeout||5000);
 			};
 		})();
 
