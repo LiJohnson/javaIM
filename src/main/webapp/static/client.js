@@ -11,34 +11,36 @@ window.MY = (function(){
 		var socket ;//= new WebSocket(url);
 		var onMessage = [];
 		
-		var q = [];
-		
-		this.send = function(name , text , callback){
+		var messageBuffer = [];
+
+		this.send = function(name , text){
 			var postData = {};
 			if( typeof name == "object" ){ 
 				postData = name ; 
-				callback = text; 
 			}else{
 				postData.name = name;
 				postData.text = text;
 			}
+
 			postData = JSON.stringify(postData );
 			
 			if( !isInit ){
-				q.push(postData);
+				messageBuffer.push(postData);
 			}
 			else{
 				socket.send(postData);	
 			}
-			
-			callback && callback();
-			
+			return _this;
 		};
 		
-		this.listen = function(callback){
+		this.listen = this.on = function( type , callback){
+			if( typeof type == 'function' ){callback = type ; type = false;}
 			if( typeof callback != "function" )return;
-			onMessage.push(callback);
+
+			onMessage.push({type:type,fun:callback});
 			onMessage.length == 1 && initSocket();
+
+			return _this;
 		};
 		
 		var initSocket = function(){
@@ -46,20 +48,29 @@ window.MY = (function(){
 			isInit = false;
 			
 			socket.onopen = function(){
-				for( i in q ){
-					socket.send(q[i]);
+				for( i in messageBuffer ){
+					socket.send(messageBuffer[i]);
 				}
+				messageBuffer = [];
 				isInit = true;
 			};
 			
 			socket.onclose = function(){
-				$.log("closed");
+
 				setTimeout(function(){initSocket();},2000);
 			};
 			
 			socket.onmessage = function(event){
+				var data = JSON.parse(event.data);
 				for( var i in onMessage ){
-					onMessage[i].call(_this,$.parseJSON(event.data));
+					var obj = onMessage[i];
+					if( obj.type === false ){
+						return obj.fun.call(_this,data);
+					}
+
+					if( data.type == obj.type ){
+						return obj.fun.call(_this,data);
+					}
 				}
 			};
 		};

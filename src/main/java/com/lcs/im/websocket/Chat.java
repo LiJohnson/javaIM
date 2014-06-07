@@ -42,6 +42,7 @@ public class Chat extends TextWebSocketHandler {
 			int atIndex = text.indexOf("@");
 			int spaceIndex = text.indexOf(" ");
 			if( atIndex == 0 && spaceIndex > 1 ){
+				json.put("private",true);
 				String name = text.substring(1,spaceIndex);
 				this.handleMessage.sendMessage(json, session);
 				json.put("text", text.substring(spaceIndex));

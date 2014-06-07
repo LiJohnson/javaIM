@@ -7,5 +7,4 @@
 	s.onclose = function(){
 		$.log("closed");
 	};
-	
 })();

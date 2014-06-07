@@ -21,14 +21,14 @@
 	<script>
 	var baseUrl = "${baseUrl}";
 
-    var KEY_CODE = {
-    		leftArrow:37,
-    	    upArrow:38,
-    	    rightArrow:39,
-    	    downArrow:40,
-    	    enter:13
-    };
-    
+	var KEY_CODE = {
+			leftArrow:37,
+			upArrow:38,
+			rightArrow:39,
+			downArrow:40,
+			enter:13
+	};
+	
 	$(function(){
 		var $form = $("form");
 		var $list = $("[list]");
@@ -45,7 +45,7 @@
 			if( html == "clear" ){
 				$list.empty();
 			}else{
-			    $list.append("<div class='alert alert-success alert-dismissable' style='font-size: 12px;' > <button type='button' class='close animate' data-dismiss='alert' aria-hidden='true' style='right:-15px;'>&times;</button>" + html + "</div>");	
+				$list.append("<div class='alert alert-success alert-dismissable' style='font-size: 12px;' > <button type='button' class='close animate' data-dismiss='alert' aria-hidden='true' style='right:-15px;'>&times;</button>" + html + "</div>");	
 			}
 			/^#.+/.test($inputor.val()) && $inputor.val("");
 			$(".chat-body").animate({scrollTop:$list.height()});
@@ -77,7 +77,7 @@
 				if( message.file ){
 					$t.append(getFileHtml(message.file , (message.text.match(/\\$\S+/)||[""])[0].replace(/^\\$/,'')));
 				}
-				if( message.toId ){
+				if( message.private ){
 					$t.addClass("alert-warning");
 				}
 
@@ -108,7 +108,7 @@
 					var cmd = this.cmds[name];
 					cmd.title && html.push("<a href=javascript:; data-cmd='"+cmd.name+"'>"+cmd.title+"</a> : " + cmd.desc);
 				}
-				return "<p>" + html.join("</p><p>") + "</p>";
+				return "<p>" + html.join("</p><hr><p>") + "</p>";
 			}
 		});
 		
@@ -235,7 +235,7 @@
 		helper.addCmd({
 			name:"who",
 			title:"在线用户",
-			desc:"发送“<a>#who</a>”查看在线用户（有时延是必须的）",
+			desc:"发送“<a>#who</a>”查看在线用户",
 			excu:function(){
 				s.send({type:"who"});
 				return false;
@@ -243,13 +243,13 @@
 		});
 		
 		helper.addCmd({
-            name:"about",
-            title:"关于",
-            desc:"V2.0 <br>基于 long polling & ajax 开发<br>github <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>",
-            excu:function(){
-            	return "V2.0 <br>基于 long polling & ajax 开发<br>github <a href='http://t.cn/8F1RjZQ' target=_blank  >http://t.cn/8F1RjZQ</a>";
-            }
-        });
+			name:"about",
+			title:"关于",
+			desc:"V3.0 <br>基于 websocket 开发<br>github <a href='http://t.cn/RvJgIA6' target=_blank  >http://t.cn/RvJgIA6</a>",
+			excu:function(){
+				return "V3.0 <br>基于 websocket 开发<br>github <a href='http://t.cn/RvJgIA6' target=_blank  >http://t.cn/RvJgIA6</a>";
+			}
+		});
 
 		var addFile = function( file){
 			var reader = new FileReader();
@@ -268,11 +268,14 @@
 			if(!$form.check())return false;
 			var postData = $form.getData();
 			inputHistory.add(postData.text);
-			!helper.excu(postData.text) && s.send(postData,function(){
+			if(!helper.excu(postData.text)) {
 				var text = $inputor.val()||"";
-				$inputor.val((text.match(/^@[^\s@[]+\s?/)||[""])[0]);
+				if( text.match(/^@/) && !text.match(/^@[^\s@\[]+\s+[^\s]+/) )return false;
+
+				s.send(postData);
+				$inputor.val((text.match(/^@[^\s@\[]+\s?/)||[""])[0]);
 				$file.empty();
-			});
+			}
 			return false;
 		});
 		
@@ -307,7 +310,7 @@
 			},
 			limit:8
 		}).atwho({
-		   	at:"#",
+			at:"#",
 			tpl:"<li data-value='${'${atwho-at}${name}'}' title='${'${desc}'}' >${'${showName}'} <small>${'${showDesc}'}</small></li>",
 			data:(function(){
 				var data = [];
@@ -372,26 +375,27 @@
 		$file.on("click",".close",function(){
 			$file.empty();
 		});
-		
-		s.listen(function(data){
-			if(data.type == "connected"){
-				$form.find("input[name=id]").val(data.uid);
-				s.send( $.extend($form.getData(),{type:"connected"}) );
-			}else if( data.type == "count" ){
-				$("[data-online]").html(data.count);
-			}else if( data.type == "who" ){
-                data = data && data.data || [];
-                var html = [];
-                for( var i = 0 , user ; user = data[i] ; i++ ){
-                    html.push("<a href=javascript:; data-at='"+user+"'>"+user+"</a>");
-                }
-                helper.printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
-			}else if( data.type == "atwho" ){
-				$inputor.data("atwhoCallback").call(this,data.data||[]);
-			}else{
-				print([data],$form.find("input[name=id]").val());	
+
+		s.on("connected",function(data){
+			$form.find("input[name=id]").val(data.uid);
+			s.send( $.extend($form.getData(),{type:"connected"}) );
+
+		}).on("count",function(data){
+			$("[data-online]").html(data.count);
+
+		}).on("who",function(data){
+			data = data && data.data || [];
+			var html = [];
+			for( var i = 0 , user ; user = data[i] ; i++ ){
+				html.push("<a href=javascript:; data-at='"+user+"'>"+user+"</a>");
 			}
-			
+			helper.printTip("<ol><li>" + html.join("</li><li>") + "</li></ol>");
+
+		}).on("atwho",function(data){
+			$inputor.data("atwhoCallback").call(this,data.data||[]);
+
+		}).on("message",function(data){
+			print([data],$form.find("input[name=id]").val());	
 		});
 		
 		print(chatCache.get(),chatCache.stor.get("id"),true);
@@ -403,6 +407,7 @@
 		.chat-body , .chat-head , .chat-foot{position: fixed;left: 0;right: 0;border: 0px solid red;}
 		.chat-head{top:0;height:20px;}
 		.chat-body{top:20px;bottom: 50px;overflow-y: scroll;overflow-x: hidden;}
+		.chat-body hr{margin: 6px auto;}
 		.chat-foot{height: 50px;bottom: 0;}
 		.chat-body{overflow-y:overflow-y: scroll;}
 		.chat-foot textarea,.chat-foot input{height:50px;margin: 0;padding:0;display: inline-block;}
