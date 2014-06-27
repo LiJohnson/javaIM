@@ -5,6 +5,27 @@ var io = require("socket.io")(server);
 
 var sockets = {};
 
+var OnPost = function(socket){
+	var callbacks = {};
+	this.on = function(type,callback){
+		if( typeof callback != 'function' )return;
+
+		callbacks[type] = callbacks[type] || [];
+		callbacks[type].push(callback);
+		return this;
+	};
+
+	this.trigger = function(type,data){
+		if( !callbacks[type] )return;
+
+		for( var i = 0 ; i < callbacks[type].length ; i++  ){
+			data.data = callbacks[type][i].call(this,data.data);
+			socket.emit("post",data);
+		}
+	};
+};
+
+
 app.get("/",function(req,res){	
 	var file = __dirname +req._parsedUrl.pathname;
 	res.sendfile(file);
@@ -20,20 +41,15 @@ app.get("/static/*",function(req,res){
 
 io.on("connection",function(socket){
 	console.log("someone comes");
+	var post = new OnPost(socket);
 	
 	sockets[socket.id] = {
 		socket:socket,
 		name:'name'
 	};
 
-	var res = function(name,cb){
-		socket.on(name,function(data){
-			data = cb.call(this,data,function(data){
-				data && socket.emit(name,data);
-			});
-			data && socket.emit(name,data);
-		});
-	};
+	post.on("who",function(){});
+	post.on("name",function(){});
 
 	socket.on("disconnect",function(){
 		delete sockets[socket.id];
@@ -46,13 +62,9 @@ io.on("connection",function(socket){
 
 	}).on("name",function(name){
 
+	}).on("post",function(data){
+		post.trigger(data.type,data);
 	});
-
-	res("ha",function(data,cb){
-		console.log(data);
-		cb.call(this,"shit")
-		return "haha";
-	})
 })
 
 server.listen(9090,function(){
@@ -66,3 +78,4 @@ server.listen(9090,function(){
 
 
 
+

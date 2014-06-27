@@ -1,79 +1,35 @@
 window.MY = (function(){
 	var MY = {};
 
-	MY.SocketClient = function( url ){
-		if( !window.WebSocket )throw("not suported!");
-		if( !url )throw("need a url!");
-		
-		var _this = this;
-		
-		var isInit = false;
-		var socket ;//= new WebSocket(url);
-		var onMessage = [];
-		
-		var messageBuffer = [];
+	MY.SocketClient = function( ){
+		var socket = new io();
+		var id = 0;
+		var map = [];
+
+		socket.on("post",function(data){
+			map[data.id] && map[data.id].call(this,data.data);
+			delete map[data.id];
+		});
 
 		this.send = function(name , text){
-			var postData = {};
-			if( typeof name == "object" ){ 
-				postData = name ; 
-			}else{
-				postData.name = name;
-				postData.text = text;
-			}
-
-			postData = JSON.stringify(postData );
-			
-			if( !isInit ){
-				messageBuffer.push(postData);
-			}
-			else{
-				socket.send(postData);	
-			}
-			return _this;
 		};
 		
+		this.post = function(type,data,cb){
+			if( typeof data == 'function' ){
+				cd = data ;
+				data = {};
+			}
+
+			id++;
+			map[id] = cb;
+			socket.emit("post",{type:type,data:data,id:id});
+		};
+
 		this.listen = this.on = function( type , callback){
-			if( typeof type == 'function' ){callback = type ; type = false;}
-			if( typeof callback != "function" )return;
-
-			onMessage.push({type:type,fun:callback});
-			onMessage.length == 1 && initSocket();
-
-			return _this;
+			socket.on(type,callback)
+			return this;
 		};
 		
-		var initSocket = function(){
-			socket = new WebSocket(url);
-			isInit = false;
-			
-			socket.onopen = function(){
-				for( i in messageBuffer ){
-					socket.send(messageBuffer[i]);
-				}
-				messageBuffer = [];
-				isInit = true;
-			};
-			
-			socket.onclose = function(){
-
-				setTimeout(function(){initSocket();},2000);
-			};
-			
-			socket.onmessage = function(event){
-				var data = JSON.parse(event.data);
-				for( var i in onMessage ){
-					var obj = onMessage[i];
-					if( obj.type === false ){
-						return obj.fun.call(_this,data);
-					}
-
-					if( data.type == obj.type ){
-						return obj.fun.call(_this,data);
-					}
-				}
-			};
-		};
 	};
 	
 	/**

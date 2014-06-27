@@ -15,7 +15,7 @@
 	
 	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js,jquery.atwho.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-	
+	<script src="/static/angular.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/static/client.js"></script>
 
@@ -185,7 +185,6 @@
 			desc:"先按下ctrl键，再使用向上[↑](下[↓])箭头键可以调出输入历史"
 		});
 		
-		
 		helper.addCmd({
 			name:"opacity",
 			title:"透明",
@@ -251,7 +250,7 @@
 				return "V3.0 <br>基于 websocket 开发<br>github <a href='http://t.cn/RvJgIA6' target=_blank  >http://t.cn/RvJgIA6</a>";
 			}
 		});
-
+		/**********************************************************************************/
 		var addFile = function( file){
 			var reader = new FileReader();
 			reader.onload =function(e){
