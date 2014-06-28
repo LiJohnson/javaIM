@@ -11,7 +11,11 @@ window.MY = (function(){
 			delete map[data.id];
 		});
 
-		this.send = function(name , text){
+		this.send = function(data , text){
+			if( $.type(data) == 'string' ){
+				data = {name:data,text:text};
+			}
+			socket.emit("message",data);
 		};
 		
 		this.post = function(type,data,cb){
@@ -166,6 +170,7 @@ window.MY = (function(){
 
 			this.cmds[cmd.name] = cmd;
 
+			return this;
 		};
 		
 		/**
@@ -176,15 +181,15 @@ window.MY = (function(){
 		this.excu = function(text){
 			text = text || "";
 			if(!text.match(/^#/))return false;
+
 			var param = text.replace(/^#/,'').split(" ");
 			var cmd = this.cmds[param.shift()];
 			if( !cmd )return false;
 
-			if( !cmd.excu )return printTip(cmd.desc);
+			var res = cmd.excu && cmd.excu.apply( this , param );
 
-			var res = cmd.excu.apply( this , param );
+			res !== false && this.printTip(res || cmd.desc);
 
-			res != false && printTip(res||cmd.desc);
 			return true;
 		};
 		
@@ -422,14 +427,21 @@ window.MY = (function(){
 		});
 	});
 
+	$.richText = function(text){
+		text = String(text);
+		$.each(transChain,function(i,f){
+			text = f.fun(text);
+		});
+
+		return text;
+	};
+
 	$.fn.richText = function(){
 		this.each(function(){
 			var $this = $(this);
 			var text = ($this.html()||"").replace(/&nbsp;/g,' ');
-			$.each(transChain,function(i,f){
-				text = f.fun(text);
-			});
-			$this.html(text);
+			
+			$this.html($.richText(text));
 			$this.find("[data-swf]").click(function(){
 				var $swf = $(this);
 				if( $swf.data("embed") )return $swf.data("embed").toggle();

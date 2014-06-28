@@ -4,7 +4,7 @@ var server = require("http").Server(app);
 var io = require("socket.io")(server);
 
 var sockets = {};
-
+var online = 0;
 var OnPost = function(socket){
 	var callbacks = {};
 	this.on = function(type,callback){
@@ -24,13 +24,31 @@ var OnPost = function(socket){
 		}
 	};
 };
+//ad 
+var broadCast = function(type,data){
+	for( var i in sockets ){
+		sockets[i].socket.emit(type,data);
+	};
+};
+var getWho = function(text){
+	var name = (text.match(/^@\S+/)||[false])[0];
+	if(!name)return false;
 
+	var list = [];
+	for( var i in sockets ){
+		var s = sockets[i];
+		if( s.name == name){
+			list.push(s.socket);
+		}
+	}
+	return list;
+};
 
 app.get("/",function(req,res){	
 	var file = __dirname +req._parsedUrl.pathname;
 	res.sendfile(file);
 	
-	console.log("---------------------------------------------------------------------------------------------------------");
+	console.log("-----------------------");
 	console.log(file);
 });
 
@@ -47,35 +65,51 @@ io.on("connection",function(socket){
 		socket:socket,
 		name:'name'
 	};
+	online++;
 
-	post.on("who",function(){});
-	post.on("name",function(){});
+	broadCast("online",online);
+	
+	post.on("who",function(){
+		var data = [];
+		for( var i in sockets ){
+			data.push(sockets[i].name);
+		}
+		return data;
+
+	}).on("rename",function(name){
+		return sockets[socket.id].name = name || "name";
+	}).on("atwho",function(){
+		var data = [];
+		for( var i in sockets ){
+			data.push({name:sockets[i].name});
+		}
+		return data;
+	});
 
 	socket.on("disconnect",function(){
 		delete sockets[socket.id];
+		online--;
+		broadCast("online",online);
 		console.log("someone's gone");
 	}).on("message",function(data,s,e){
-		console.log(data,s,e);
-	}).on("atWho",function(){
-
-	}).on("who",function(){
-
-	}).on("name",function(name){
-
+		data.name = sockets[socket.id].name;
+		var privateSocket = getWho(data.text);
+		if( !privateSocket ){
+			broadCast("message",data)	
+		}else if( privateSocket.length == 0 ){
+			socket.emit("message",data);
+			data.text = '人不在';
+			socket.emit("message",data);
+		}else{
+			for( var i = 0 , s ; s = privateSocket[i] ; i++){
+				s.emit("message",data);
+			}
+		}
 	}).on("post",function(data){
 		post.trigger(data.type,data);
 	});
 })
 
 server.listen(9090,function(){
-	console.log("ha",server);
+	console.log("ha",9090);
 });
-
-
-
-
-
-
-
-
-
