@@ -11,14 +11,15 @@
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/style.css">
 	<link rel="stylesheet" href="http://1.gtbcode.sinaapp.com/css/jquery.atwho.css">
+	<link rel="stylesheet" href="/static/css/chat.css">
 	
 	
 	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js,jquery.atwho.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-	<script src="/static/angular.js"></script>
+	<script src="/static/js/angular.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="/static/client.js"></script>
-	<script src="/static/im.js"></script>
+	<script src="/static/js/client.js"></script>
+	<script src="/static/js/chat.js"></script>
 
 	<script>
 
@@ -32,23 +33,7 @@
 	
 	</script>
 	<style>
-		.chat{position: relative;}
-		.chat img{max-width: 50px;max-height: 50px;}
-		.chat-body , .chat-head , .chat-foot{position: fixed;left: 0;right: 0;border: 0px solid red;}
-		.chat-head{top:0;height:20px;}
-		.chat-body{top:20px;bottom: 50px;overflow-y: scroll;overflow-x: hidden;}
-		.chat-body hr{margin: 6px auto;}
-		.chat-foot{height: 50px;bottom: 0;}
-		.chat-body{overflow-y:overflow-y: scroll;}
-		.chat-foot textarea,.chat-foot input{height:50px;margin: 0;padding:0;display: inline-block;}
-		.chat-foot textarea{width: 93%;}
-		.chat-foot input{width: 5%;}
-		.chat-foot .file{position: absolute;left: 0;bottom: 50px;}
-		.self{text-align: right;}
-		.at{background-color:#f2dede;}
-		.self .badge{background-color: #5bc0de;float: left;}
-		[list] .badge{cursor: pointer;}
-		.chat-body img.emojis{zoom:0.8;}
+		
 	</style>
 </head>
 <body>
@@ -74,9 +59,9 @@
 							</div>
 						</div>
 						
-						<div ng-if="!message.tip">
-							{{message.text}}
-							<span>{{message.name}}</span>
+						<div ng-if="!message.tip" class="chat-message {{message.self}}" >
+							<span class="label label-default chat-name " >{{message.name}}</span>
+							<span class="chat-text" >{{message.text}}</span>
 						</div>
 					</div>
 				</div>

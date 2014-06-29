@@ -25,8 +25,11 @@ var OnPost = function(socket){
 	};
 };
 //ad 
-var broadCast = function(type,data){
+var broadCast = function(type,data , socket){
 	for( var i in sockets ){
+		if( socket ){
+			data.self =  socket.id == sockets[i].socket.id ? 'self' : 'other';
+		}
 		sockets[i].socket.emit(type,data);
 	};
 };
@@ -94,8 +97,9 @@ io.on("connection",function(socket){
 	}).on("message",function(data,s,e){
 		data.name = sockets[socket.id].name;
 		var privateSocket = getWho(data.text);
+
 		if( !privateSocket ){
-			broadCast("message",data)	
+			broadCast("message",data,socket)	
 		}else if( privateSocket.length == 0 ){
 			socket.emit("message",data);
 			data.text = '人不在';
@@ -112,4 +116,4 @@ io.on("connection",function(socket){
 
 server.listen(9090,function(){
 	console.log("ha",9090);
-});
+});
