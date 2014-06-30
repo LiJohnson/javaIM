@@ -19,6 +19,7 @@
 	<script src="/static/js/angular.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/static/js/client.js"></script>
+	<script src="/static/js/cmd.js"></script>
 	<script src="/static/js/chat.js"></script>
 
 	<script>
@@ -69,6 +70,7 @@
 		</div>
 	</div>
 	<div class="chat-foot">
+		<div ng-bind-html="abs"></div>
 		<form ng-submit="submit()" >
 		   <div class="file"></div>
 		   <textarea check-len="1" name="text" ng-model="message.text" ng-keyup="keyup($event)" class="form-control" resize="false" placeholder="发送 “#help”查看帮助" ></textarea>

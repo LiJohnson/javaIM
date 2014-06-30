@@ -18,9 +18,9 @@
 			enter:13
 	};
 
-	var app = angular.module("app",[]);
-	app.controller('imController',  function($scope,$sce){
-		var list = $scope.list = [];
+	var app = angular.module("app",['ngSanitize']);
+	app.controller('imController',  function($scope,$sce,$timeout){
+
 		var socket = new MY.SocketClient();
 		var helper = new MY.Helper();
 		var setting = new MY.Setting();
@@ -29,27 +29,34 @@
 		var inputs = new MY.InputHistory();
 		var $form = $("form");
 
-		var update = function(data,value){
-			if( typeof data == 'string' ){
-				$scope[data] = value;
-			}else{
-				$.each(data,function(k,v){
-					$scope[k] = v;
-				});
-			}
-			$scope.$apply();
+		$scope.list = [];
+		cache.get().forEach(function(a){delete a.$$hashKey ; $scope.list.push(a)});
+		var toScroll = function(){
+			$timeout(function(){
+				$(".chat-body").animate({scrollTop:99999});
+			},3);
 		};
 		helper.printTip = function(text){
-			$.log($sce);
 			$scope.list.push({tip:$sce.trustAsHtml(text)});
+			toScroll();
 		};
+
+		helper.setting = setting;
+		helper.$scope = $scope;
+		helper.socket = socket;
+
 
 		helper.addCmd({
 			name:"help",
 			title:"帮助",
 			desc:"帮助",
 			excu:function(){
-				return "FFFFFFFFF";
+				var html = ["<ol>"];
+				$.each(this.getCmdData(),function(i,cmd){
+					html.push("<li><a href='javascript:;' data-cmd='#"+cmd.name+" '>"+cmd.name+"</a>"+(cmd.desc||cmd.title)+"</li>")
+				});
+				html.push("</ol>");
+				return html.join("");
 			}
 		}).addCmd({
 			name: "emojis" ,
@@ -73,15 +80,6 @@
 				return html.join("\n");
 			}
 		}).addCmd({
-			name:"rename",
-			title:"设置用户名",
-			excu:function(name){
-				socket.post("rename",name,function(name){
-					//setting.
-					$.log()
-				});
-			}
-		}).addCmd({
 			name:"who",
 			title:"在线用户",
 			desc:"查看且有在线在用户",
@@ -93,6 +91,10 @@
 			}
 		});
 		
+		$.each(window.cmds||[],function(){
+			helper.addCmd(this);
+		});
+
 		$form.find("textarea").atwho({
 			at:"@",
 			tpl:"<li data-value='${'${atwho-at}${name}'}' >${'${name}'}</li>",
@@ -152,8 +154,11 @@
 		});
 
 		socket.on("message",function(message){
+			message.text = $sce.trustAsHtml($.richText(message.text)) ;
 			$scope.list.push(message);
-			$scope.$apply();
+			cache.push(message);
+			//$scope.$apply();
+			toScroll();
 		});
 		
 		$scope.selectCate = function(cate){
@@ -164,6 +169,9 @@
 			$scope.$apply();
 		}).on("click","a.emoji",function(){
 			$scope.message.text = ($scope.message.text || "") + $(this).attr("title");
+			$scope.$apply();
+		}).on("click","a[data-cmd]",function(){
+			$scope.message.text = $(this).data("cmd") + ($scope.message.text||"");
 			$scope.$apply();
 		});
 
@@ -195,11 +203,8 @@
 		$scope.remove = function(index){
 			$scope.list.remove(index);
 		};
-
-		$scope.deliberatelyTrustDangerousSnippet = function() {  
-		return $sce.trustAsHtml($scope.snippet);  
-		};
-
+		toScroll();
+		$scope.abs="<b>a</b>";
 		window.a=$scope;
 	});
 })();

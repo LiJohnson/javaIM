@@ -140,6 +140,15 @@ window.MY = (function(){
 			value = value*1 || 100;
 			this.stor.set("opacity", value < 30 ? 30 : value );
 		};
+
+		this.get = function(key,defaultValue){
+			var v = this.stor.get(key);
+			return v == void 0 ? defaultValue : v;
+		};
+		
+		this.set = function(key,value){
+			return this.stor.set(key,value);
+		};
 	};
 
 	/**
@@ -149,6 +158,10 @@ window.MY = (function(){
 	MY.Helper = function( printTip ){
 		this.cmds = {};
 		var _this = this;
+		
+		this.setting = false ;
+		this.$scope = false ;
+		this.socket = false ;
 
 		this.printTip = printTip || function(){};
 

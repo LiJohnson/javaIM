@@ -63,11 +63,12 @@ app.get("/static/*",function(req,res){
 io.on("connection",function(socket){
 	console.log("someone comes");
 	var post = new OnPost(socket);
-	
-	sockets[socket.id] = {
+	var user = sockets[socket.id] = {
+		id:socket.id,
 		socket:socket,
 		name:'name'
 	};
+	
 	online++;
 
 	broadCast("online",online);
@@ -80,7 +81,7 @@ io.on("connection",function(socket){
 		return data;
 
 	}).on("rename",function(name){
-		return sockets[socket.id].name = name || "name";
+		return sockets[socket.id].name = name || sockets[socket.id].name || "name";
 	}).on("atwho",function(){
 		var data = [];
 		for( var i in sockets ){
@@ -116,4 +117,4 @@ io.on("connection",function(socket){
 
 server.listen(9090,function(){
 	console.log("ha",9090);
-});
+});
