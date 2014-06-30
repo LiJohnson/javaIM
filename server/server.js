@@ -24,7 +24,7 @@ var OnPost = function(socket){
 		}
 	};
 };
-//ad 
+
 var broadCast = function(type,data , socket){
 	for( var i in sockets ){
 		if( socket ){

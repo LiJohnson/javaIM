@@ -30,6 +30,7 @@
 		var $form = $("form");
 
 		$scope.list = [];
+		$scope.message = $scope.message || {};	
 		cache.get().forEach(function(a){delete a.$$hashKey ; $scope.list.push(a)});
 		var toScroll = function(){
 			$timeout(function(){
@@ -37,7 +38,7 @@
 			},3);
 		};
 		helper.printTip = function(text){
-			$scope.list.push({tip:$sce.trustAsHtml(text)});
+			$scope.list.push({tip:text});
 			toScroll();
 		};
 
@@ -51,9 +52,9 @@
 			title:"帮助",
 			desc:"帮助",
 			excu:function(){
-				var html = ["<ol>"];
+				var html = ["<ol class='helper' >"];
 				$.each(this.getCmdData(),function(i,cmd){
-					html.push("<li><a href='javascript:;' data-cmd='#"+cmd.name+" '>"+cmd.name+"</a>"+(cmd.desc||cmd.title)+"</li>")
+					html.push("<li><a href='#'class='cmd' title='#"+cmd.name+" '>"+cmd.name+"</a>"+(cmd.desc||cmd.title)+"</li>")
 				});
 				html.push("</ol>");
 				return html.join("");
@@ -84,10 +85,12 @@
 			title:"在线用户",
 			desc:"查看且有在线在用户",
 			excu:function(){
+				var $this = this;
 				socket.post("who",function(data){
-					$scope.list.push({tip:data.join("<br>")});
+					$this.printTip(data.join("<br>"));
 					$scope.$apply();
 				});
+				return false;
 			}
 		});
 		
@@ -154,24 +157,24 @@
 		});
 
 		socket.on("message",function(message){
-			message.text = $sce.trustAsHtml($.richText(message.text)) ;
+			message.text = $.richText(message.text);
 			$scope.list.push(message);
 			cache.push(message);
 			//$scope.$apply();
 			toScroll();
 		});
-		
+
 		$scope.selectCate = function(cate){
 			helper.excu("#emojis " + cate);
 		};
-		$(document).on("click",'.btn[data-category]',function(){
-			helper.excu("#emojis " + $(this).data('category'));
+		$(document).on("click",'.btn.category',function(){
+			helper.excu("#emojis " + $(this).attr('title'));
 			$scope.$apply();
 		}).on("click","a.emoji",function(){
 			$scope.message.text = ($scope.message.text || "") + $(this).attr("title");
 			$scope.$apply();
-		}).on("click","a[data-cmd]",function(){
-			$scope.message.text = $(this).data("cmd") + ($scope.message.text||"");
+		}).on("click","a.cmd",function(){
+			$scope.message.text = $(this).attr("title") + ($scope.message.text||"");
 			$scope.$apply();
 		});
 

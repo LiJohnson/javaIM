@@ -2,13 +2,23 @@ window.MY = (function(){
 	var MY = {};
 
 	MY.SocketClient = function( ){
+		var $this = this;
 		var socket = new io();
 		var id = 0;
 		var map = [];
+		var onNewMessage = [];
 
 		socket.on("post",function(data){
 			map[data.id] && map[data.id].call(this,data.data);
 			delete map[data.id];
+		});
+
+		socket.on("message",function(message){
+			if( message.self != 'self' ){
+				for( var i in onNewMessage ){
+					onNewMessage[i].call($this,message);
+				}
+			}
 		});
 
 		this.send = function(data , text){
@@ -34,6 +44,10 @@ window.MY = (function(){
 			return this;
 		};
 		
+		this.onNewMessage = function(fun){
+			onNewMessage.push(fun);
+		};
+
 	};
 	
 	/**

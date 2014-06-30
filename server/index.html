@@ -17,25 +17,12 @@
 	<script src="http://1.gtbcode.sinaapp.com/load.php?c=1&type=js&load=jquery.js,jquery.plugin.js,jquery.atwho.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 	<script src="/static/js/angular.js"></script>
+	<script src="/static/js/angular-sanitize.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/static/js/client.js"></script>
 	<script src="/static/js/cmd.js"></script>
 	<script src="/static/js/chat.js"></script>
 
-	<script>
-
-	var KEY_CODE = {
-			leftArrow:37,
-			upArrow:38,
-			rightArrow:39,
-			downArrow:40,
-			enter:13
-	};
-	
-	</script>
-	<style>
-		
-	</style>
 </head>
 <body>
 <div class="chat" ng-app="app" ng-controller="imController" >
@@ -62,7 +49,7 @@
 						
 						<div ng-if="!message.tip" class="chat-message {{message.self}}" >
 							<span class="label label-default chat-name " >{{message.name}}</span>
-							<span class="chat-text" >{{message.text}}</span>
+							<span class="chat-text" ng-bind-html="message.text"></span>
 						</div>
 					</div>
 				</div>
@@ -70,7 +57,6 @@
 		</div>
 	</div>
 	<div class="chat-foot">
-		<div ng-bind-html="abs"></div>
 		<form ng-submit="submit()" >
 		   <div class="file"></div>
 		   <textarea check-len="1" name="text" ng-model="message.text" ng-keyup="keyup($event)" class="form-control" resize="false" placeholder="发送 “#help”查看帮助" ></textarea>
