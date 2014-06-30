@@ -20,7 +20,7 @@ window.MY = (function(){
 		
 		this.post = function(type,data,cb){
 			if( typeof data == 'function' ){
-				cd = data ;
+				cb = data ;
 				data = {};
 			}
 
