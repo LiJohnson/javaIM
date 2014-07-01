@@ -20,8 +20,12 @@ var OnPost = function(socket){
 		if( !callbacks[type] )return;
 
 		for( var i = 0 ; i < callbacks[type].length ; i++  ){
-			data.data = callbacks[type][i].call(this,data.data);
-			socket.emit("post",data);
+			data.data = callbacks[type][i].call(this,data.data,function(d){
+				data.data = d ;
+				socket.emit("post",data);
+			});
+
+			data.data && socket.emit("post",data);
 		}
 	};
 };
@@ -91,10 +95,9 @@ io.on("connection",function(socket){
 			data.push({name:sockets[i].name});
 		}
 		return data;
-	}).on("fm",function(chaelId){
-		douban.getSong(2,function(){
-			
-		});
+	}).on("fm",function(chaelId,cb){
+		douban.getSong(chaelId*1||2,cb);
+		return false;
 	});
 
 	socket.on("disconnect",function(){

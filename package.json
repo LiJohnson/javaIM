@@ -4,6 +4,7 @@
   "description": "my first node shit",
   "dependencies": {
   	"socket.io":"",
-  	"express":""
+  	"express":"",
+  	"nodegrass":""
   }
 }
