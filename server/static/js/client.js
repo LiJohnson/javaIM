@@ -193,7 +193,7 @@ window.MY = (function(){
 
 			if( this.cmds[cmd.name] )throw("cmd: "+cmd.name+" existed!");
 
-			if( cmd.init )cmd.init.call(this);
+			if( cmd.init )cmd.init.call(this,this);
 
 			this.cmds[cmd.name] = cmd;
 
@@ -213,9 +213,15 @@ window.MY = (function(){
 			var cmd = this.cmds[param.shift()];
 			if( !cmd )return false;
 
+			if(  cmd.excu ){
+				var arg = cmd.excu.toString().match(/^function\s*[^\(]*\([^\)]*\)/)[0].replace(/^function\s*[^\()]*\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(",");
+				if( arg[0] == "$this" ){
+					param.unshift(this);
+				}
+			}
 			var res = cmd.excu && cmd.excu.apply( this , param );
 
-			res !== false && this.printTip(res || cmd.desc);
+			res !== false && this.printTip(res || cmd.desc || cmd.title);
 
 			return true;
 		};
@@ -444,12 +450,15 @@ window.MY = (function(){
 	//@
 	addFun(function(text){
 		return text.replace(/@[^\s<]+/g,function(name){
-			return "<a href=javascript:; data-at='"+name.replace(/^@/,'')+"' title='"+name+"'>"+name+"</a>";
+			return "<a href='#' data-at='"+name.replace(/^@/,'')+"' title='"+name+"'>"+name+"</a>";
 		});
 	});
 	//#
 	addFun(function(text){
 		return text.replace(/#[^#]+#/g,function(name){
+			if( name.match(/<|>/) ){
+				return name;
+			}
 			return "<a href=javascript:;  title='"+name+"'>"+name+"</a>";
 		});
 	});
@@ -458,6 +467,7 @@ window.MY = (function(){
 		text = String(text);
 		$.each(transChain,function(i,f){
 			text = f.fun(text);
+			$.log(text,f.fun);
 		});
 
 		return text;
