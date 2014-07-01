@@ -38,7 +38,7 @@
 		<div class="row chat-list" >
 		   <div class="col-md-12">
 				<div class="list-group" list>
-					<div class="list-group-item" ng-repeat="message in list">
+					<div class="list-group-item {{message.private}}" ng-repeat="message in list">
 						<div ng-if="message.tip" >
 							<div class='alert alert-success alert-dismissable' style='font-size: 12px;'>
 								<button type='button' class='close animate' ng-click="remove($index)" aria-hidden='true' style='right:-15px;'>&times;</button>
@@ -47,7 +47,7 @@
 							</div>
 						</div>
 						
-						<div ng-if="!message.tip" class="chat-message {{message.self}}" >
+						<div ng-if="!message.tip" class="chat-message {{message.self}} " >
 							<span class="label label-default chat-name " >{{message.name}}</span>
 							<span class="chat-text" ng-bind-html="message.text"></span>
 						</div>

@@ -2,6 +2,7 @@
 var app = require("express")();
 var server = require("http").Server(app);
 var io = require("socket.io")(server);
+var douban = require("./douban").douban();
 
 var sockets = {};
 var online = 0;
@@ -34,13 +35,15 @@ var broadCast = function(type,data , socket){
 	};
 };
 var getWho = function(text){
-	var name = (text.match(/^@\S+/)||[false])[0];
-	if(!name)return false;
+	var names = text.match(/^@[\w\d_]+\s+(@[\w\d_]+\s+)*/);
+	if(!names)return false;
+	
+	names = names[0].replace(/@/g,'').split(/\s+/);
 
 	var list = [];
 	for( var i in sockets ){
 		var s = sockets[i];
-		if( s.name == name){
+		if( names.indexOf(s.name) != -1 ){
 			list.push(s.socket);
 		}
 	}
@@ -88,6 +91,10 @@ io.on("connection",function(socket){
 			data.push({name:sockets[i].name});
 		}
 		return data;
+	}).on("fm",function(chaelId){
+		douban.getSong(2,function(){
+			
+		});
 	});
 
 	socket.on("disconnect",function(){
@@ -106,9 +113,13 @@ io.on("connection",function(socket){
 			data.text = '人不在';
 			socket.emit("message",data);
 		}else{
+			data.private = "private";
+			
+			socket.emit("message",data);
+			
 			for( var i = 0 , s ; s = privateSocket[i] ; i++){
 				s.emit("message",data);
-			}
+			}			
 		}
 	}).on("post",function(data){
 		post.trigger(data.type,data);
@@ -118,3 +129,6 @@ io.on("connection",function(socket){
 server.listen(9090,function(){
 	console.log("ha",9090);
 });
+
+
+

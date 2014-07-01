@@ -2,8 +2,10 @@
 	var cmds = [{
 		name:"rename",
 		title:"设置用户名",
-		excu:function(name){
-			var $this = this;
+		excu:function( $this , name){
+			if(!name){
+				return 0;
+			}
 			this.socket.post("rename",name,function(name){
 				$this.printTip("new name : " + name);
 				$this.setting.set("name",name);
@@ -24,10 +26,9 @@
 			this.setting.desktop(option);
 			return "desktop : " + (this.setting.desktop() ? "on" : "off");
 		},
-		init:function(){
-			var $this = this;
+		init:function( $this ){
 			this.socket.onNewMessage(function(message){
-				$.log($this.setting.desktop());
+				$this.setting.desktop() && $this.notify.desktop(message);
 			});
 		}
 	},
@@ -39,10 +40,9 @@
 			this.setting.sound(option);
 			return "sound : " + (this.setting.sound() ? "on" : "off");
 		},
-		init:function(){
-			var $this = this;
+		init:function( $this ){
 			this.socket.onNewMessage(function(message){
-				$.log($this.setting.sound());
+				$this.setting.sound() && $this.notify.sound();
 			});
 		}
 	},
@@ -60,6 +60,27 @@
 		},
 		init:function(){
 			$("body").css("opacity",(this.setting.opacity()||100)/100) ;
+		}
+	},{
+		name:"fm",
+		title:"音乐",
+		desc:"豆瓣音乐",
+		excu:(function(){
+			var fmData = {};
+			$.getJSON("/static/js/fm.json",function(data){
+				fmData = data;
+			});
+			return function(chanel){
+				var html = [];
+				$.each(fmData,function(i,fm){
+					html.push("<a><img src='"+fm.cover+"' />"+fm.name+"</a>");
+				});
+				return html.join("");
+			};
+
+		})(),
+		init:function($this){
+			
 		}
 	}];
 //opacity

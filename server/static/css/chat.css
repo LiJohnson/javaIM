@@ -1,1 +1,104 @@
-.chat{position:relative}.chat img{max-width:50px;max-height:50px}.chat-body,.chat-head,.chat-foot{position:fixed;left:0;right:0;border:0 solid #f00}.chat-head{top:0;height:20px}.chat-body{top:20px;bottom:50px;overflow-y:scroll;overflow-x:hidden}.chat-body hr{margin:6px auto}.chat-foot{height:50px;bottom:0}.chat-body{overflow-y:scroll}.chat-foot textarea,.chat-foot input{height:50px;margin:0;padding:0;display:inline-block}.chat-foot textarea{width:93%}.chat-foot input{width:5%}.chat-foot .file{position:absolute;left:0;bottom:50px}.at{background-color:#f2dede}.self .badge{background-color:#5bc0de;float:left}[list] .badge{cursor:pointer}.chat-body img.emojis{zoom:.8}.chat-message .chat-text{float:right}.chat-message.self .chat-text{float:none}.chat-message.self .chat-name{float:right;background:#5bc0de}
+/**
+var a = document.createElement("a") , style , less = [];
+var pre = ".pre(@style,@value){\n";
+pre += '\t-webkit-@{style}: @value;\n';
+pre += '\t   -moz-@{style}: @value;\n';
+pre += '\t\t-ms-@{style}: @value;\n';
+pre += '\t\t\t@{style}: @value;\n}';
+
+var tmp = '.style(@value){\n';
+tmp += '\t.pre(style,@value)\n}';
+
+less.push(pre);
+for( var i in a.style ){
+	if( !/^webkit/.test(i) )continue;
+
+	style = i.replace(/[A-Z]/g,function(i){return "-"+i}).replace(/^webkit\-/,'').toLowerCase();
+	less.push(tmp.replace(/style/g,style));
+}
+console.log(less.join('\n'))
+ */
+.chat {
+  position: relative;
+}
+.chat img {
+  max-width: 50px;
+  max-height: 50px;
+}
+.chat-body,
+.chat-head,
+.chat-foot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  border: 0px solid red;
+}
+.chat-head {
+  top: 0;
+  height: 20px;
+}
+.chat-body {
+  top: 20px;
+  bottom: 50px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.chat-body hr {
+  margin: 6px auto;
+}
+.chat-foot {
+  height: 50px;
+  bottom: 0;
+}
+.chat-body {
+  overflow-y: scroll;
+}
+.chat-foot textarea,
+.chat-foot input {
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+}
+.chat-foot textarea {
+  width: 93%;
+}
+.chat-foot input {
+  width: 5%;
+}
+.chat-foot .file {
+  position: absolute;
+  left: 0;
+  bottom: 50px;
+}
+.at {
+  background-color: #f2dede;
+}
+.self .badge {
+  background-color: #5bc0de;
+  float: left;
+}
+[list] .badge {
+  cursor: pointer;
+}
+.chat-body img.emojis {
+  zoom: 0.8;
+}
+.chat-message .chat-text {
+  float: right;
+}
+.chat-message.self .chat-text {
+  float: none;
+}
+.chat-message.self .chat-name {
+  float: right;
+  background: #5bc0de;
+}
+.chat-message a[title] {
+  cursor: pointer;
+}
+.private {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+}

@@ -16,7 +16,12 @@ window.MY = (function(){
 		socket.on("message",function(message){
 			if( message.self != 'self' ){
 				for( var i in onNewMessage ){
-					onNewMessage[i].call($this,message);
+					try{
+						onNewMessage[i].call($this,message);	
+					}catch(e){
+						$.log(e,i,onNewMessage);
+					}
+					
 				}
 			}
 		});
@@ -176,7 +181,8 @@ window.MY = (function(){
 		this.setting = false ;
 		this.$scope = false ;
 		this.socket = false ;
-
+		this.notify = new MY.Notify();
+		this.currentCmd = false;
 		this.printTip = printTip || function(){};
 
 		/**
@@ -193,6 +199,7 @@ window.MY = (function(){
 
 			if( this.cmds[cmd.name] )throw("cmd: "+cmd.name+" existed!");
 
+			this.currentCmd = cmd;
 			if( cmd.init )cmd.init.call(this,this);
 
 			this.cmds[cmd.name] = cmd;
@@ -212,7 +219,7 @@ window.MY = (function(){
 			var param = text.replace(/^#/,'').split(" ");
 			var cmd = this.cmds[param.shift()];
 			if( !cmd )return false;
-
+			this.currentCmd = cmd;
 			if(  cmd.excu ){
 				var arg = cmd.excu.toString().match(/^function\s*[^\(]*\([^\)]*\)/)[0].replace(/^function\s*[^\()]*\(/,'').replace(/\)$/,'').replace(/\s/g,'').split(",");
 				if( arg[0] == "$this" ){
@@ -467,7 +474,6 @@ window.MY = (function(){
 		text = String(text);
 		$.each(transChain,function(i,f){
 			text = f.fun(text);
-			$.log(text,f.fun);
 		});
 
 		return text;

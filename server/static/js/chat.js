@@ -100,7 +100,7 @@
 
 		$form.find("textarea").atwho({
 			at:"@",
-			tpl:"<li data-value='${'${atwho-at}${name}'}' >${'${name}'}</li>",
+			tpl:"<li data-value='${atwho-at}${name}' >${name}</li>",
 			callbacks: {
 				remote_filter:function (query, cb) {
 					socket.post("atwho",function(data){
@@ -183,8 +183,8 @@
 
 			inputs.add($scope.message.text);
 			!helper.excu($scope.message.text) && socket.send($scope.message);
-			
-			$scope.message = {};
+			$scope.message.text = ($scope.message.text.match(/^@\S+\s/)||[])[0]
+			//$scope.message = {};
 		};
 
 		$scope.keyup = function(e){
