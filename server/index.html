@@ -49,6 +49,7 @@
 						
 						<div ng-if="!message.tip" class="chat-message {{message.self}} " >
 							<span class="label label-default chat-name " >{{message.name}}</span>
+							<form ng-if="message.pic" action="{{message.pic}}" target="_blank"><img  src="{{message.pic}}" /></form>
 							<span class="chat-text" ng-bind-html="message.text"></span>
 						</div>
 					</div>
@@ -58,7 +59,10 @@
 	</div>
 	<div class="chat-foot">
 		<form ng-submit="submit()" >
-		   <div class="file"></div>
+		   <div class="file">
+		   		<a class="close {{ message.pic ? '' : 'hide' }}" ng-click="removeImage()">&times;</a>
+		   		<img src="{{message.pic}}" />
+		   </div>
 		   <textarea check-len="1" name="text" ng-model="message.text" ng-keyup="keyup($event)" class="form-control" resize="false" placeholder="发送 “#help”查看帮助" ></textarea>
 		   <input type="submit" value=" " class="btn btn-default btn-warning" />
 		</form>

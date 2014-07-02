@@ -183,6 +183,7 @@ window.MY = (function(){
 		this.socket = false ;
 		this.notify = new MY.Notify();
 		this.currentCmd = false;
+		this.cache = false;
 		this.printTip = printTip || function(){};
 
 		/**
@@ -428,7 +429,8 @@ window.MY = (function(){
 			return "http://www.xiami.com/widget/0_"+id[0]+"/singlePlayer.swf";
 		}).replace(/http:\/\/www.xiami.com\/widget\/\d+_\d+\/singlePlayer.swf(\?\S*)?/gi,function(swf,index,text){
 			if( index > 0 && /['"=]/.test(text.charAt(index-1)) )return swf;
-			return "<a href=javascript:; class='label label-default' style= 'padding: 0 3px;' data-swf='"+swf+"' data-swf-param='{width:257,height:33,wmode:\"transparent\"}' ><span class='glyphicon glyphicon-music'></span></a>";
+
+			return "<a href='#"+swf+"|{width:257,height:33,wmode:\"transparent\"}' class='swf label label-default' style= 'padding: 0 3px;' ><span class='glyphicon glyphicon-music'></span></a>";
 		});
 	});
 
@@ -450,7 +452,7 @@ window.MY = (function(){
 	//link
 	addFun(function(text){
 		return (text || "").replace(/https?:\/\/[^\s\[@<]+/gi,function(link,index , text){
-			if( index > 0 && /['"=]/.test(text.charAt(index-1)) )return link;
+			if( index > 0 && /['"=#]/.test(text.charAt(index-1)) )return link;
 			return "<a class=external href='"+link+"' title='"+link+"' target=_blank >"+link.replace(/https?:\/\//i,"").substr(0,15)+"</a>";
 		});
 	});
@@ -474,6 +476,7 @@ window.MY = (function(){
 		text = String(text);
 		$.each(transChain,function(i,f){
 			text = f.fun(text);
+			$.log(text,f.fun);
 		});
 
 		return text;
@@ -485,13 +488,14 @@ window.MY = (function(){
 			var text = ($this.html()||"").replace(/&nbsp;/g,' ');
 			
 			$this.html($.richText(text));
-			$this.find("[data-swf]").click(function(){
+			$this.find(".swf").click(function(){
 				var $swf = $(this);
 				if( $swf.data("embed") )return $swf.data("embed").toggle();
 
 				var $embed = $("<embed type='application/x-shockwave-flash'   wmode='transparent'></embed>");
 				
-				$embed.prop($.extend({src:$swf.data("swf")} , eval("("+$swf.data("swfParam")+")")||{}));
+				var href = this.hash.split("|");
+				$embed.prop($.extend({src:href[0]} , eval("("+href[1]+")")||{}));
 				$this.after($embed);
 				$swf.data("embed",$embed);
 			});

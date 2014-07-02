@@ -63,6 +63,45 @@
 		}
 	},
 	{
+		name:"pic",
+		title:"发送图片",
+		desc:"拖拽或粘贴图片到输入窗口",
+		excu:function(){
+			return "<input type=file class=pic />";
+		},
+		init:function($this){
+			//$(document).on("change","input[type=file].pic",function(){
+			//	$(this).getImage(function(base64){
+			//		$this.$scope.message.pic = base64;
+			//		$this.$scope.$apply();
+			//	});
+			//});
+
+			$("textarea").getImage(function(base64){
+				$this.$scope.message.pic = base64;
+				$this.$scope.message.text = $this.$scope.message.text || "图片";
+				$this.$scope.$apply();
+			});
+		}
+	},
+	{
+		name:"music",
+		title:"音乐",
+		init:function(){
+			$(document).on("click","a.swf",function(){
+				var $swf = $(this);
+				if( $swf.data("embed") )return $swf.data("embed").toggle();
+
+				var $embed = $("<embed type='application/x-shockwave-flash'   wmode='transparent'></embed>");
+				
+				var href = this.hash.split("|");
+				$embed.prop($.extend({src:href[0].replace(/^#/,'')} , eval("("+href[1]+")")||{}));
+				$swf.parent().after($embed);
+				$swf.data("embed",$embed);
+			});
+		}
+	},
+	{
 		name:"fm",
 		title:"音乐",
 		desc:"豆瓣音乐",
@@ -104,12 +143,17 @@
 		"like": 0
 	}
 			*/
-			var $fm = $("<audio controls class='fm' />");
+			var $fm = $("<audio class='fm' autoplay=true  controls=true />");
 			var getSong = (function(){
 				var buffers = {};
+				var curCid = false;
 				return function(cid , cb){
+					curCid = cid = cid || curCid;
+					if(!cid)return;
+
 					var buffer = buffers[cid] || [];
 					var song = buffer.shift();
+					$.log(buffer,song);
 					if( song )return cb(song);
 
 					$this.socket.post("fm",cid,function(data){
@@ -126,17 +170,30 @@
 					this.pause();
 				});
 				var html = "<div><audio controls src='"+song.url+"' />";
+				html += "<a href='http://music.douban.com"+song.album+"' target=_blank >"
 				html += "<img src='"+song.picture+"'>";
 				html += "<br> " + song.artist + " : " + song.title;
+				html += "</a>"
 				html += "</div>";
 				$fm.appendTo('body').prop("src",song.url);
 				$this.printTip(html);
 
 			};
+			$fm.on("ended error",function(){
+				getSong(false,play);
+			});
 
 			$(document).on("click","a.fm",function(){
 				getSong( $(this).attr("title") , play );
 			});
+		}
+	},{
+		name:"clear",
+		title:"清屏",
+		excu:function($this){
+			$this.$scope.list = [];
+			$this.cache.clear();
+			return "OK";
 		}
 	}];
 //opacity

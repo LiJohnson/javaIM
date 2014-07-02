@@ -45,6 +45,7 @@
 		helper.setting = setting;
 		helper.$scope = $scope;
 		helper.socket = socket;
+		helper.cache = cache;
 
 
 		helper.addCmd({
@@ -183,8 +184,12 @@
 
 			inputs.add($scope.message.text);
 			!helper.excu($scope.message.text) && socket.send($scope.message);
-			$scope.message.text = ($scope.message.text.match(/^@\S+\s/)||[])[0]
-			//$scope.message = {};
+			
+			$scope.message = {text:($scope.message.text.match(/^@\S+\s/)||[])[0]};
+		};
+
+		$scope.removeImage = function(){
+			$scope.message.pic= "";
 		};
 
 		$scope.keyup = function(e){
@@ -208,6 +213,7 @@
 		};
 		toScroll();
 		$scope.abs="<b>a</b>";
-		window.a=$scope;
+		window.$scope = $scope;
+		window.$sce = $sce;
 	});
 })();
