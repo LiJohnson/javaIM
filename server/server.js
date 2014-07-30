@@ -55,7 +55,7 @@ var getWho = function(text){
 };
 
 app.get("/",function(req,res){	
-	var file = __dirname +req._parsedUrl.pathname;
+	var file = __dirname + "/index.html";
 	res.sendfile(file);
 	
 	console.log("-----------------------");
