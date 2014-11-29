@@ -5,7 +5,11 @@ var DouBan = function() {
 	this.getSong = function(chanelID, cb) {
 		
 		return nodegrass.get(URL+chanelID , function(data){
-			cb( JSON.parse(data) );
+			try{
+				cb( JSON.parse(data) );
+			}catch(e){
+				cb({error:true});
+			}
 		});
 	};
 }
